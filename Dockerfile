@@ -1,5 +1,5 @@
 # Use a specific Python version for reproducibility
-FROM python:3.12-slim AS builder
+FROM python:3.10-slim AS builder
 
 # Set environment variables
 ENV PYTHONFAULTHANDLER=1 \
@@ -38,7 +38,7 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 
 # Build stage for production
-FROM python:3.12-slim AS production
+FROM python:3.10-slim AS production
 
 # Set environment variables
 ENV PYTHONFAULTHANDLER=1 \
@@ -76,7 +76,7 @@ WORKDIR /app
 
 # Copy from builder stage
 COPY --from=builder /app /app
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Install additional packages for human-in-the-loop and AI safety

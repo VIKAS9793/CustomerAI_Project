@@ -1,5 +1,6 @@
-# Python 3.12 compatibility
+# Python 3.10 compatibility
 # Last updated: May 4, 2025
+# Standardized Python version across all project components
 # Core dependencies
 fastapi>=0.110.0
 uvicorn>=0.27.1
