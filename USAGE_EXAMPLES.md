@@ -12,6 +12,7 @@ This document provides step-by-step examples for using the CustomerAI Insights P
 6. [Human Review Workflow](#human-review-workflow)
 7. [Dashboard Analytics](#dashboard-analytics)
 8. [Integration Examples](#integration-examples)
+9. [Using Advanced AI/ML Features](#using-advanced-ai-ml-features)
 
 ## Setting Up the Environment
 
@@ -760,6 +761,380 @@ print(f"Processing complete. {len(results_df)} conversations processed successfu
 if not errors_df.empty:
     print(f"{len(errors_df)} conversations had errors.")
     errors_df.to_csv('processing_errors.csv', index=False)
+```
+
+## Using Advanced AI/ML Features
+
+### Working with Multiple LLM Providers
+
+#### Basic Text Generation with Different LLM Providers
+
+The CustomerAI platform allows you to easily use different LLM providers based on your specific requirements:
+
+```python
+from cloud.ai.llm_manager import get_llm_manager
+
+# Get the global LLM manager
+llm_manager = get_llm_manager()
+
+async def generate_content_examples():
+    # Generate text with OpenAI GPT-4o (default provider)
+    gpt4_response = await llm_manager.generate_text(
+        prompt="Summarize the key benefits of our premium banking services in 3 bullet points",
+        temperature=0.7,
+        max_tokens=300
+    )
+    print(f"GPT-4o response:\n{gpt4_response['text']}\n")
+    
+    # Generate with Claude (for compliance-focused content)
+    try:
+        claude_response = await llm_manager.generate_text(
+            prompt="Create a compliant explanation of investment risks for retail banking customers",
+            client_id="claude_sonnet",  # Specified client ID from config
+            system_prompt="You are a financial compliance expert familiar with banking regulations",
+            temperature=0.3,
+            max_tokens=500
+        )
+        print(f"Claude response:\n{claude_response['text']}\n")
+    except ValueError:
+        print("Claude client not configured, skipping...")
+    
+    # Generate with Google Gemini (for more conversational content)
+    try:
+        gemini_response = await llm_manager.generate_text(
+            prompt="Create a friendly welcome message for new banking app users",
+            client_id="gemini_pro",  # Specified client ID from config
+            temperature=0.8,
+            max_tokens=200
+        )
+        print(f"Gemini response:\n{gemini_response['text']}\n")
+    except ValueError:
+        print("Gemini client not configured, skipping...")
+
+# Run the async function using asyncio
+import asyncio
+asyncio.run(generate_content_examples())
+```
+
+#### Configuring LLM Providers Programmatically
+
+You can register and configure LLM providers at runtime:
+
+```python
+from cloud.ai.llm_provider import LLMProvider, LLMConfig, LLMComplianceLevel, LLMCapability
+from cloud.ai.llm_manager import get_llm_manager
+
+# Get the LLM manager
+llm_manager = get_llm_manager()
+
+# Register a specialized financial compliance client
+llm_manager.register_financial_client(
+    client_id="financial_compliance",
+    provider=LLMProvider.ANTHROPIC,  # Claude is strong for financial compliance
+    model_name="claude-3-5-sonnet-20240620"
+)
+
+# Register a specialized client for customer service responses
+llm_config = LLMConfig(
+    provider=LLMProvider.OPENAI,
+    model_name="gpt-4o",
+    compliance_level=LLMComplianceLevel.FINANCIAL,
+    capabilities=[
+        LLMCapability.TEXT_GENERATION,
+        LLMCapability.CLASSIFICATION
+    ],
+    additional_params={"user": "customer-service"}
+)
+
+llm_manager.register_client("customer_service", llm_config)
+
+# Set default client
+llm_manager.set_default_client("customer_service")
+
+# Now you can use these clients in your application
+async def check_compliance(text):
+    # Use the financial compliance client
+    result = await llm_manager.generate_text(
+        prompt=f"Review this text for financial compliance issues: {text}",
+        client_id="financial_compliance",
+        system_prompt="You are an expert in financial regulations",
+        temperature=0.1
+    )
+    return result["text"]
+```
+
+#### Implementing Fallback Between LLM Providers
+
+Create robust applications by implementing fallback mechanisms:
+
+```python
+from cloud.ai.llm_manager import get_llm_manager
+import logging
+
+logger = logging.getLogger(__name__)
+
+async def generate_with_fallback(prompt, system_prompt=None):
+    llm_manager = get_llm_manager()
+    
+    # Define the provider priority order
+    providers = ["gpt4o_financial", "claude_sonnet", "gemini_pro"]
+    
+    for provider in providers:
+        try:
+            logger.info(f"Attempting to generate text with provider: {provider}")
+            response = await llm_manager.generate_text(
+                prompt=prompt,
+                client_id=provider,
+                system_prompt=system_prompt,
+                temperature=0.7,
+                max_tokens=500
+            )
+            logger.info(f"Successfully generated text with provider: {provider}")
+            return response["text"]
+        except Exception as e:
+            logger.warning(f"Provider {provider} failed: {str(e)}")
+            # Continue to next provider
+            continue
+    
+    # If all providers fail, return an error message
+    logger.error("All LLM providers failed")
+    return "Sorry, our AI services are currently unavailable. Please try again later."
+```
+
+#### Using Embeddings for Semantic Search
+
+The platform provides a unified interface for generating embeddings:
+
+```python
+from cloud.ai.llm_manager import get_llm_manager
+import numpy as np
+
+async def semantic_search(query, documents):
+    llm_manager = get_llm_manager()
+    
+    # Get embeddings for the query and documents
+    query_embedding = await llm_manager.get_embeddings(
+        texts=[query],
+        client_id="embeddings"  # Use dedicated embeddings model
+    )
+    
+    document_embeddings = await llm_manager.get_embeddings(
+        texts=documents,
+        client_id="embeddings"
+    )
+    
+    # Calculate cosine similarity
+    def cosine_similarity(a, b):
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    
+    # Get similarity scores
+    similarities = [
+        cosine_similarity(query_embedding[0], doc_embedding)
+        for doc_embedding in document_embeddings
+    ]
+    
+    # Return documents sorted by similarity
+    sorted_documents = [doc for _, doc in sorted(
+        zip(similarities, documents),
+        key=lambda pair: pair[0],
+        reverse=True
+    )]
+    
+    return sorted_documents
+```
+
+#### Customer Sentiment Analysis with Financial Context
+
+Analyze customer sentiment with financial domain intelligence:
+
+```python
+from src.sentiment_analyzer import SentimentAnalyzer
+
+# Create the sentiment analyzer (it will use the configured LLMs automatically)
+analyzer = SentimentAnalyzer(use_cached=True)
+
+async def analyze_financial_feedback(feedback):
+    # Analyze using the LLM-powered sentiment analyzer
+    result = await analyzer.analyze_with_llm(feedback)
+    
+    # Extract key information
+    sentiment = result["sentiment"]
+    satisfaction = result["satisfaction_score"]
+    key_positives = result["key_positives"]
+    key_negatives = result["key_negatives"]
+    
+    # Create a customer-friendly summary
+    summary = f"Sentiment: {sentiment.capitalize()}\n"
+    summary += f"Satisfaction: {satisfaction}/10\n"
+    
+    if key_positives:
+        summary += "\nPositive aspects:\n"
+        for i, positive in enumerate(key_positives, 1):
+            summary += f"{i}. {positive}\n"
+    
+    if key_negatives:
+        summary += "\nAreas for improvement:\n"
+        for i, negative in enumerate(key_negatives, 1):
+            summary += f"{i}. {negative}\n"
+    
+    return {
+        "raw_analysis": result,
+        "summary": summary
+    }
+```
+
+#### Fine-tuning LLM Configuration
+
+Fine-tune the LLM configuration for specific use cases:
+
+```python
+import json
+import os
+
+# Create a custom LLM configuration file
+config = {
+    "default_client": "financial_assistant",
+    "clients": {
+        "financial_assistant": {
+            "provider": "openai",
+            "model_name": "gpt-4o",
+            "compliance_level": "financial",
+            "capabilities": ["text_generation", "classification"],
+            "timeout_seconds": 30,
+            "additional_params": {
+                "user": "financial-advisor",
+                "safe_mode": True
+            }
+        },
+        "document_processor": {
+            "provider": "anthropic",
+            "model_name": "claude-3-opus-20240229",
+            "compliance_level": "financial",
+            "capabilities": ["text_generation", "document_processing"],
+            "timeout_seconds": 120
+        },
+        "rapid_responder": {
+            "provider": "google",
+            "model_name": "gemini-1.5-flash",
+            "compliance_level": "standard",
+            "capabilities": ["text_generation"],
+            "timeout_seconds": 10
+        }
+    }
+}
+
+# Write the configuration to a file
+os.makedirs("config", exist_ok=True)
+with open("config/custom_llm_config.json", "w") as f:
+    json.dump(config, f, indent=2)
+
+# Use the custom configuration
+from cloud.ai.llm_manager import LLMManager
+
+custom_manager = LLMManager(config_path="config/custom_llm_config.json")
+
+# Now you can use the custom manager
+async def process_document(document_text):
+    response = await custom_manager.generate_text(
+        prompt=f"Analyze this financial document and extract key information: {document_text}",
+        client_id="document_processor",
+        max_tokens=1000
+    )
+    return response["text"]
+```
+
+### Kubernetes Deployment
+
+Deploy your CustomerAI models on Kubernetes:
+
+```python
+from cloud.deployment.kubernetes import K8sDeployer
+from cloud.config import CloudProvider
+
+# Initialize Kubernetes deployer
+deployer = K8sDeployer(
+    namespace="customerai",
+    config_file="~/.kube/config"
+)
+
+# Deploy a model
+deployment = deployer.deploy_model(
+    model_name="sentiment-analyzer",
+    model_uri="s3://customerai-models/sentiment-analyzer-v2",
+    replicas=3,
+    resources={
+        "requests": {
+            "cpu": "500m",
+            "memory": "1Gi"
+        },
+        "limits": {
+            "cpu": "2",
+            "memory": "4Gi",
+            "nvidia.com/gpu": "1"
+        }
+    },
+    auto_scaling={
+        "min_replicas": 2,
+        "max_replicas": 10,
+        "target_cpu_utilization": 70
+    },
+    env_vars={
+        "MODEL_NAME": "sentiment-analyzer-v2",
+        "LOG_LEVEL": "INFO"
+    }
+)
+
+# Check deployment status
+status = deployer.get_deployment_status("sentiment-analyzer")
+print(f"Deployment status: {status['phase']}")
+print(f"Available replicas: {status['available_replicas']}/{status['replicas']}")
+
+# Get service endpoint
+endpoint = deployer.get_service_endpoint("sentiment-analyzer")
+print(f"Service endpoint: {endpoint}")
+```
+
+### OpenTelemetry for Observability
+
+Integrate OpenTelemetry for comprehensive observability:
+
+```python
+from cloud.observability import telemetry
+from opentelemetry import trace
+from opentelemetry.trace.status import Status, StatusCode
+import time
+
+# Initialize tracer (done automatically when using CustomerAI framework)
+tracer = telemetry.get_tracer(__name__)
+
+# Create a span for an operation
+with tracer.start_as_current_span("process_customer_data") as span:
+    # Add attributes to the span
+    span.set_attribute("customer.id", "cust-12345")
+    span.set_attribute("data.size", 1024)
+    
+    try:
+        # Record events
+        span.add_event("Starting data processing")
+        
+        # Simulate processing
+        time.sleep(0.5)
+        
+        # Create a child span
+        with tracer.start_as_current_span("data_transformation") as child_span:
+            child_span.set_attribute("transformation.type", "normalization")
+            time.sleep(0.3)
+            
+        # Record metrics
+        telemetry.record_metric("data_processing_duration", 0.8)
+        
+        # Add another event
+        span.add_event("Data processing completed")
+    except Exception as e:
+        # Record error
+        span.set_status(Status(StatusCode.ERROR))
+        span.record_exception(e)
+        raise
 ```
 
 These examples demonstrate common usage patterns for the CustomerAI Insights Platform. For more specific use cases or advanced integrations, please refer to the full API documentation. 

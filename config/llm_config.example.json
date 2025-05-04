@@ -1,0 +1,59 @@
+{
+    "default_client": "gpt4o_financial",
+    "clients": {
+        "gpt4o_financial": {
+            "provider": "openai",
+            "model_name": "gpt-4o",
+            "compliance_level": "financial",
+            "capabilities": ["text_generation", "embeddings", "classification"],
+            "additional_params": {
+                "user": "financial-services",
+                "safe_mode": true
+            }
+        },
+        "claude_sonnet": {
+            "provider": "anthropic",
+            "model_name": "claude-3-5-sonnet-20240620",
+            "compliance_level": "financial",
+            "capabilities": ["text_generation", "classification"],
+            "additional_params": {
+                "user": "financial-services"
+            }
+        },
+        "gemini_pro": {
+            "provider": "google",
+            "model_name": "gemini-1.5-pro",
+            "compliance_level": "financial",
+            "capabilities": ["text_generation", "embeddings", "classification"],
+            "additional_params": {
+                "user": "financial-services"
+            }
+        },
+        "gpt4o_standard": {
+            "provider": "openai",
+            "model_name": "gpt-4o",
+            "compliance_level": "standard",
+            "capabilities": ["text_generation", "embeddings", "classification", "document_processing", "code_generation"],
+            "timeout_seconds": 60
+        },
+        "claude_opus": {
+            "provider": "anthropic",
+            "model_name": "claude-3-opus-20240229",
+            "compliance_level": "standard",
+            "capabilities": ["text_generation", "classification", "document_processing"],
+            "timeout_seconds": 120
+        },
+        "embeddings": {
+            "provider": "openai",
+            "model_name": "text-embedding-3-large",
+            "capabilities": ["embeddings"]
+        }
+    },
+    "usage_examples": {
+        "sentiment_analysis": "gpt4o_financial",
+        "document_processing": "claude_opus",
+        "embeddings": "embeddings",
+        "code_generation": "gpt4o_standard",
+        "compliance_checking": "claude_sonnet"
+    }
+} 

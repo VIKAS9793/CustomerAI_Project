@@ -306,4 +306,104 @@ If you experience OpenAI API errors:
 1. Verify your `OPENAI_API_KEY` is valid
 2. Check your API usage and limits
 3. Check if you have billing enabled on your OpenAI account
-4. Set `AI_MOCK=true` for testing without API calls 
+4. Set `AI_MOCK=true` for testing without API calls
+
+## AI and ML Configuration
+
+### LLM Provider Configuration
+
+The CustomerAI Insights Platform supports multiple LLM providers that can be configured in various ways:
+
+> **Disclaimer for Developers**: The LLM integration system is designed to be highly customizable according to your specific business requirements and use cases. Developers have complete flexibility to configure token limits, model selection, temperature settings, system prompts, and other parameters for each provider. This allows for optimizing different aspects such as cost management, inference speed, output quality, and regulatory compliance based on your organization's priorities.
+
+#### Configuration File
+
+Create a JSON file at `config/llm_config.json`:
+
+```json
+{
+  "default_client": "gpt4o_financial",
+  "clients": {
+    "gpt4o_financial": {
+      "provider": "openai",
+      "model_name": "gpt-4o",
+      "compliance_level": "financial",
+      "capabilities": ["text_generation", "embeddings", "classification"],
+      "additional_params": {
+        "user": "financial-services",
+        "safe_mode": true
+      }
+    },
+    "claude_sonnet": {
+      "provider": "anthropic",
+      "model_name": "claude-3-5-sonnet-20240620",
+      "compliance_level": "financial",
+      "capabilities": ["text_generation", "classification"]
+    },
+    "gemini_pro": {
+      "provider": "google",
+      "model_name": "gemini-1.5-pro",
+      "compliance_level": "standard",
+      "capabilities": ["text_generation", "embeddings", "classification"]
+    }
+  }
+}
+```
+
+#### Environment Variables
+
+Configure your `.env` file with the following variables:
+
+```
+# LLM Provider API Keys
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_ORGANIZATION=your_openai_org_id  # Optional
+
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+GOOGLE_API_KEY=your_google_ai_api_key_here
+
+# Azure OpenAI (Optional)
+AZURE_OPENAI_API_KEY=your_azure_openai_key_here
+AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com
+AZURE_OPENAI_API_VERSION=2023-12-01-preview
+
+# LLM Configuration Path
+LLM_CONFIG_PATH=config/llm_config.json
+
+# LLM Security Settings
+LLM_ALLOW_USER_DATA=false
+LLM_LOG_PROMPTS=false
+LLM_LOG_COMPLETIONS=false
+LLM_MAX_TOKENS=4000
+LLM_REQUEST_TIMEOUT=60
+LLM_ENABLE_CONTENT_FILTERING=true
+```
+
+#### Runtime Configuration
+
+You can also configure LLM providers programmatically:
+
+```python
+from cloud.ai.llm_provider import LLMProvider, LLMConfig, LLMComplianceLevel, LLMCapability
+from cloud.ai.llm_manager import get_llm_manager
+
+# Get the LLM manager
+llm_manager = get_llm_manager()
+
+# Register a financial compliance client
+llm_manager.register_financial_client(
+    client_id="financial_compliance",
+    provider=LLMProvider.ANTHROPIC,
+    model_name="claude-3-5-sonnet-20240620"
+)
+
+# Set as default
+llm_manager.set_default_client("financial_compliance")
+```
+
+### JAX Configuration
+
+JAX is used for high-performance numerical computing. Configure JAX specific settings in your `.env` file:
+
+```

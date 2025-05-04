@@ -13,6 +13,7 @@ This document provides solutions to common issues you might encounter while sett
 7. [Database Problems](#database-problems)
 8. [Dashboard Issues](#dashboard-issues)
 9. [Error Codes Reference](#error-codes-reference)
+10. [Troubleshooting Modern AI/ML Tools](#troubleshooting-modern-ai-ml-tools)
 
 ## Installation Issues
 
@@ -261,4 +262,191 @@ If you're still experiencing issues after trying these solutions, please:
    - Error messages and stack traces
    - Steps to reproduce
    - Environment details (OS, Python version, package versions)
-3. For urgent support, contact the development team at support@customerai-insights.example.com 
+3. For urgent support, contact the development team at support@customerai-insights.example.com
+
+## Troubleshooting Modern AI/ML Tools
+
+### JAX Issues
+
+#### JAX GPU Errors
+
+**Problem**: JAX fails to use GPU with errors like `XLA compilation failed` or `No GPU/TPU backend found`.
+
+**Solutions**:
+1. Ensure you have the GPU-enabled version of JAX installed:
+   ```bash
+   pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+   ```
+2. Check CUDA environment variables:
+   ```bash
+   echo $CUDA_VISIBLE_DEVICES
+   ```
+3. Try restarting with explicit platform setting:
+   ```python
+   import os
+   os.environ['JAX_PLATFORM_NAME'] = 'gpu'
+   ```
+4. If running in a container, ensure GPU is properly passed through with Docker's `--gpus all` flag.
+
+#### JAX Memory Issues
+
+**Problem**: Out of memory errors when using JAX with large models or datasets.
+
+**Solutions**:
+1. Use JAX's `pmap` for multi-GPU parallelism or `vmap` for vectorization
+2. Apply gradient checkpointing:
+   ```python
+   from jax.checkpoint import checkpoint
+   gradient_function = checkpoint(original_function)
+   ```
+3. Use 16-bit precision with `jax.config.update("jax_enable_x64", False)`
+
+### Ray Cluster Issues
+
+#### Ray Cluster Not Connecting
+
+**Problem**: Unable to connect to Ray cluster with `ray.init()` failing.
+
+**Solutions**:
+1. Check if Ray cluster is running:
+   ```bash
+   ray status
+   ```
+2. Ensure firewall isn't blocking ports (default: 6379, 8265)
+3. For remote clusters, provide explicit address:
+   ```python
+   ray.init(address="ray://10.0.0.1:10001")
+   ```
+4. Check Ray dashboard at http://localhost:8265 for cluster status
+
+#### Ray Out of Resources
+
+**Problem**: Ray tasks fail with "Resource Deadlock" or "No available node" errors.
+
+**Solutions**:
+1. Increase resource limits when starting Ray:
+   ```bash
+   ray start --head --num-cpus=8 --num-gpus=1 --object-store-memory=10000000000
+   ```
+2. Use resource constraints in task definitions:
+   ```python
+   @ray.remote(num_cpus=2, num_gpus=0.5, memory=2000 * 1024 * 1024)
+   def my_task():
+       pass
+   ```
+3. Monitor resource usage in Ray dashboard
+
+### MLflow Issues
+
+#### MLflow Connection Errors
+
+**Problem**: Unable to connect to MLflow tracking server.
+
+**Solutions**:
+1. Verify tracking server is running:
+   ```bash
+   mlflow ui --host 0.0.0.0
+   ```
+2. Check connection URI:
+   ```python
+   mlflow.set_tracking_uri("http://localhost:5000")
+   ```
+3. Ensure network connectivity between client and server
+4. Check authentication if enabled (username/password or token)
+
+#### MLflow Artifact Storage Issues
+
+**Problem**: Unable to save or load artifacts with S3 or other remote storage.
+
+**Solutions**:
+1. Verify storage credentials are set:
+   ```bash
+   export AWS_ACCESS_KEY_ID=your_key
+   export AWS_SECRET_ACCESS_KEY=your_secret
+   ```
+2. For S3-compatible storage like MinIO, set endpoint URL:
+   ```python
+   mlflow.set_tracking_uri("http://localhost:5000")
+   os.environ['MLFLOW_S3_ENDPOINT_URL'] = 'http://localhost:9000'
+   ```
+3. Check bucket permissions and existence
+
+### Kubernetes Deployment Issues
+
+#### Pod Startup Failures
+
+**Problem**: Kubernetes pods for CustomerAI stay in "Pending" or fail to start.
+
+**Solutions**:
+1. Check pod status and description:
+   ```bash
+   kubectl get pods -n customerai
+   kubectl describe pod <pod-name> -n customerai
+   ```
+2. Verify resource requests don't exceed cluster capacity
+3. Check image pull secrets if using private Docker registry
+4. Review pod logs:
+   ```bash
+   kubectl logs <pod-name> -n customerai
+   ```
+
+#### Service Connectivity Issues
+
+**Problem**: Unable to access CustomerAI services deployed on Kubernetes.
+
+**Solutions**:
+1. Check service status:
+   ```bash
+   kubectl get svc -n customerai
+   ```
+2. Verify service selector matches pod labels
+3. Try port-forwarding to debug:
+   ```bash
+   kubectl port-forward svc/customerai-api 8000:8000 -n customerai
+   ```
+4. Check ingress configuration if accessing from outside the cluster:
+   ```bash
+   kubectl get ingress -n customerai
+   ```
+
+### OpenTelemetry Issues
+
+#### Traces Not Appearing
+
+**Problem**: Traces aren't visible in Jaeger UI.
+
+**Solutions**:
+1. Verify Jaeger is running:
+   ```bash
+   docker ps | grep jaeger
+   ```
+2. Check OTLP endpoint configuration:
+   ```bash
+   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+   ```
+3. Ensure service name is set:
+   ```python
+   from opentelemetry import trace
+   from opentelemetry.sdk.trace import TracerProvider
+   from opentelemetry.sdk.trace.export import BatchSpanProcessor
+   from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+   
+   provider = TracerProvider()
+   processor = BatchSpanProcessor(OTLPSpanExporter())
+   provider.add_span_processor(processor)
+   trace.set_tracer_provider(provider)
+   ```
+4. Check Jaeger UI at http://localhost:16686
+
+#### Metrics Not Appearing
+
+**Problem**: Metrics aren't visible in Prometheus/Grafana.
+
+**Solutions**:
+1. Verify Prometheus is running and configured to scrape your service
+2. Check metrics endpoint is exposed and accessible:
+   ```bash
+   curl http://localhost:8000/metrics
+   ```
+3. Ensure metric names follow Prometheus naming conventions
+4. Check Prometheus UI at http://localhost:9090 for target status 

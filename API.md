@@ -347,6 +347,305 @@ Retrieves summary analytics for the dashboard.
 }
 ```
 
+### Generative AI and Advanced ML
+
+#### POST /api/v1/ai/generate
+
+Generates text using state-of-the-art generative AI models.
+
+**Request Body**:
+```json
+{
+  "prompt": "Write a response to a customer who is asking about our premium credit card benefits.",
+  "model": "gpt4o_financial",
+  "max_tokens": 500,
+  "temperature": 0.7,
+  "system_prompt": "You are a helpful financial assistant with expertise in credit card benefits.",
+  "stream": false,
+  "context": {
+    "customer_segment": "premium",
+    "risk_profile": "low"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "generated_text": "Thank you for your interest in our premium credit card benefits...",
+    "usage": {
+      "prompt_tokens": 25,
+      "completion_tokens": 130,
+      "total_tokens": 155
+    },
+    "model": "gpt-4o",
+    "compliance_check": {
+      "passed": true,
+      "flags": []
+    }
+  }
+}
+```
+
+#### POST /api/v1/ai/embed
+
+Generates embeddings for text using specified model.
+
+**Request Body**:
+```json
+{
+  "texts": [
+    "What are the benefits of your premium credit card?",
+    "How do I dispute a charge on my statement?",
+    "Can I increase my credit limit?"
+  ],
+  "model": "embeddings",
+  "dimensions": 1536
+}
+```
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "embeddings": [
+      [0.0023729, 0.0078125, -0.0029297, ...],
+      [-0.0012817, 0.0035400, 0.0046387, ...],
+      [0.0018921, -0.0063477, 0.0012207, ...]
+    ],
+    "model": "text-embedding-3-large",
+    "dimensions": 1536
+  }
+}
+```
+
+#### POST /api/v1/ai/classify
+
+Classifies text into provided categories.
+
+**Request Body**:
+```json
+{
+  "text": "I'm having trouble accessing my account online after multiple attempts.",
+  "categories": [
+    "account_access",
+    "transaction_issue",
+    "balance_inquiry",
+    "fee_dispute",
+    "technical_support"
+  ],
+  "model": "claude_sonnet"
+}
+```
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "classifications": {
+      "account_access": 0.82,
+      "technical_support": 0.15,
+      "transaction_issue": 0.02,
+      "balance_inquiry": 0.01,
+      "fee_dispute": 0.0
+    },
+    "top_category": "account_access",
+    "model": "claude-3-5-sonnet-20240620"
+  }
+}
+```
+
+#### GET /api/v1/ai/providers
+
+Gets information about available LLM providers and models.
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "providers": [
+      {
+        "id": "gpt4o_financial",
+        "provider": "openai",
+        "model": "gpt-4o",
+        "compliance_level": "financial",
+        "capabilities": ["text_generation", "embeddings", "classification"],
+        "is_default": true
+      },
+      {
+        "id": "claude_sonnet",
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20240620",
+        "compliance_level": "financial",
+        "capabilities": ["text_generation", "classification"],
+        "is_default": false
+      },
+      {
+        "id": "gemini_pro",
+        "provider": "google",
+        "model": "gemini-1.5-pro",
+        "compliance_level": "financial",
+        "capabilities": ["text_generation", "embeddings", "classification"],
+        "is_default": false
+      }
+    ],
+    "default_provider": "gpt4o_financial"
+  }
+}
+```
+
+#### POST /api/v1/ai/distributed-training
+
+Creates a distributed training job for model fine-tuning.
+
+**Request Body**:
+```json
+{
+  "base_model": "customerai-classifier",
+  "training_data_uri": "s3://customerai-data/financial-sentiment-dataset.csv",
+  "validation_data_uri": "s3://customerai-data/financial-sentiment-validation.csv",
+  "hyperparameters": {
+    "learning_rate": 2e-5,
+    "epochs": 3,
+    "batch_size": 16
+  },
+  "instance_count": 4,
+  "instance_type": "ml.g4dn.xlarge"
+}
+```
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "job_id": "train-2025-05-10-12345",
+    "status": "STARTING",
+    "estimated_time": "25 minutes",
+    "model_output_uri": "s3://customerai-models/financial-sentiment-2025-05-10/",
+    "logs_uri": "s3://customerai-logs/training/train-2025-05-10-12345/"
+  },
+  "timestamp": "2025-05-10T15:20:45.123456"
+}
+```
+
+#### GET /api/v1/ai/training-job/{job_id}
+
+Gets the status of a training job.
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "job_id": "train-2025-05-10-12345",
+    "status": "IN_PROGRESS",
+    "progress": {
+      "current_epoch": 2,
+      "total_epochs": 3,
+      "current_step": 1500,
+      "total_steps": 2000,
+      "metrics": {
+        "train_loss": 0.1823,
+        "validation_accuracy": 0.9234
+      }
+    },
+    "estimated_completion": "2025-05-10T15:45:23Z"
+  },
+  "timestamp": "2025-05-10T15:30:45.123456"
+}
+```
+
+#### POST /api/v1/ai/deploy
+
+Deploys a trained model to the inference endpoint.
+
+**Request Body**:
+```json
+{
+  "model_uri": "s3://customerai-models/financial-sentiment-2025-05-10/",
+  "deployment_name": "financial-sentiment-prod",
+  "deployment_strategy": "kubernetes",
+  "replicas": 3,
+  "auto_scaling": {
+    "min_replicas": 2,
+    "max_replicas": 10,
+    "target_utilization": 70
+  },
+  "resource_requirements": {
+    "cpu": "2",
+    "memory": "4Gi",
+    "gpu": "1"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "deployment_id": "deploy-2025-05-10-67890",
+    "status": "CREATING",
+    "endpoint": "https://api.customerai.com/v1/predict/financial-sentiment-prod",
+    "metrics_endpoint": "https://metrics.customerai.com/deployments/deploy-2025-05-10-67890"
+  },
+  "timestamp": "2025-05-10T16:01:12.123456"
+}
+```
+
+#### POST /api/v1/ai/explain
+
+Gets model explanation for predictions.
+
+**Request Body**:
+```json
+{
+  "model_name": "financial-sentiment-prod",
+  "data": {
+    "text": "I am very satisfied with the quick approval process for my loan application."
+  },
+  "explanation_method": "shap"
+}
+```
+
+**Response**:
+```json
+{
+  "error": false,
+  "status_code": 200,
+  "data": {
+    "prediction": {
+      "sentiment": "positive",
+      "confidence": 0.95
+    },
+    "explanation": {
+      "method": "shap",
+      "feature_importance": [
+        {"feature": "satisfied", "importance": 0.42},
+        {"feature": "quick approval", "importance": 0.38},
+        {"feature": "very", "importance": 0.12},
+        {"feature": "loan application", "importance": 0.08}
+      ],
+      "visualization_url": "https://api.customerai.com/visualizations/exp-12345"
+    }
+  },
+  "timestamp": "2025-05-10T16:10:27.123456"
+}
+```
+
 ## Error Responses
 
 The API uses standard HTTP status codes and returns detailed error information:

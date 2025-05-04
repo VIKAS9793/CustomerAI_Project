@@ -161,6 +161,8 @@ class SentimentAnalyzer:
             Detailed sentiment analysis
         """
         try:
+            from cloud.ai.llm_manager import get_llm_manager
+            
             prompt = f"""
             You are a financial customer service sentiment analyzer. Analyze the following customer text and provide:
             1. Overall sentiment (positive, negative, or neutral)
@@ -185,19 +187,41 @@ class SentimentAnalyzer:
             Customer text: {text}
             """
             
-            response = await openai.ChatCompletion.acreate(
-                model=self.model,
-                messages=[{"role": "system", "content": prompt}],
-                temperature=0.1,
-                max_tokens=800
-            )
+            # Get the LLM manager and generate a response using the configured LLMs
+            llm_manager = get_llm_manager()
+            
+            # Try to use a financial-specific client for sentiment analysis if available
+            try:
+                response = await llm_manager.generate_text(
+                    prompt=prompt,
+                    client_id="financial_sentiment",  # Try to use a dedicated financial sentiment client if configured
+                    system_prompt="You are a specialized financial sentiment analysis system that focuses on customer feedback in financial services.",
+                    temperature=0.1,
+                    max_tokens=800
+                )
+            except ValueError:
+                # Fall back to the default client if the specific one isn't available
+                response = await llm_manager.generate_text(
+                    prompt=prompt,
+                    temperature=0.1,
+                    max_tokens=800
+                )
             
             # Parse the JSON response
-            content = response.choices[0].message.content
+            import re
+            import json
+            
+            content = response["text"]
+            
             # Find and extract the JSON part
             json_match = re.search(r'```json\n(.*?)\n```', content, re.DOTALL)
             if json_match:
                 content = json_match.group(1)
+            else:
+                # Try to extract JSON without markdown formatting
+                json_match = re.search(r'{.*}', content, re.DOTALL)
+                if json_match:
+                    content = json_match.group(0)
             
             result = json.loads(content)
             return result

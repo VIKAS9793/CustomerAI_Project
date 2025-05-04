@@ -19,6 +19,72 @@ This document lists the dependencies and third-party components used in the Cust
 - **Website**: https://github.com/googleapis/google-cloud-python
 - **Copyright**: Copyright Google LLC
 
+## AI/ML Frameworks and Libraries
+
+### JAX
+- **License**: Apache License 2.0
+- **Website**: https://github.com/google/jax
+- **Copyright**: Copyright 2018 Google LLC
+
+### Ray
+- **License**: Apache License 2.0
+- **Website**: https://github.com/ray-project/ray
+- **Copyright**: Copyright (c) 2019 The Ray Team
+
+### MLflow
+- **License**: Apache License 2.0
+- **Website**: https://github.com/mlflow/mlflow
+- **Copyright**: Copyright (c) MLflow Project
+
+### Hugging Face Transformers
+- **License**: Apache License 2.0
+- **Website**: https://github.com/huggingface/transformers
+- **Copyright**: Copyright 2018- The Hugging Face Team
+
+### DeepSpeed
+- **License**: MIT License
+- **Website**: https://github.com/microsoft/DeepSpeed
+- **Copyright**: Copyright (c) Microsoft Corporation
+
+### PyTorch
+- **License**: BSD License
+- **Website**: https://github.com/pytorch/pytorch
+- **Copyright**: Copyright (c) 2016-     Facebook, Inc
+
+## Kubernetes & Orchestration
+
+### Kubernetes Python Client
+- **License**: Apache License 2.0
+- **Website**: https://github.com/kubernetes-client/python
+- **Copyright**: Copyright The Kubernetes Authors
+
+### Kubeflow Pipelines
+- **License**: Apache License 2.0
+- **Website**: https://github.com/kubeflow/pipelines
+- **Copyright**: Copyright 2018 The Kubeflow Authors
+
+### Seldon Core
+- **License**: Apache License 2.0
+- **Website**: https://github.com/SeldonIO/seldon-core
+- **Copyright**: Copyright 2017-2020 Seldon Technologies Ltd
+
+## Observability
+
+### OpenTelemetry
+- **License**: Apache License 2.0
+- **Website**: https://github.com/open-telemetry/opentelemetry-python
+- **Copyright**: Copyright The OpenTelemetry Authors
+
+### Jaeger Client
+- **License**: Apache License 2.0
+- **Website**: https://github.com/jaegertracing/jaeger-client-python
+- **Copyright**: Copyright (c) 2016 Uber Technologies, Inc.
+
+### Prometheus Client
+- **License**: Apache License 2.0
+- **Website**: https://github.com/prometheus/client_python
+- **Copyright**: Copyright (c) 2015 The Prometheus Authors
+
 ## Python Standard Library Dependencies
 
 The project uses various modules from the Python Standard Library, which is distributed under the Python Software Foundation License.
