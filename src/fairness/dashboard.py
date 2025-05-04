@@ -17,6 +17,8 @@ from datetime import datetime
 import plotly.express as px
 import plotly.graph_objects as go
 from src.fairness.bias_detector import BiasDetector
+from src.config.fairness_config import get_fairness_config
+from src.utils.date_provider import DateProvider
 
 class FairnessDashboard:
     """
@@ -27,15 +29,57 @@ class FairnessDashboard:
     recommendations.
     """
     
-    def __init__(self, bias_detector: Optional[BiasDetector] = None):
+    def __init__(self, bias_detector: Optional[BiasDetector] = None, config: Dict = None):
         """
         Initialize the FairnessDashboard.
         
         Args:
             bias_detector: Optional BiasDetector instance
+            config: Optional configuration dictionary with visualization parameters
+                - color_palette: Color palette for visualizations
+                - chart_types: Available chart types
+                - default_chart: Default chart type
+                - decimal_places: Number of decimal places to display
+                - max_items: Maximum number of items to display per page
+                
+        If config is not provided, settings will be loaded from the centralized
+        configuration system, which can be customized by organizations.
         """
+        # Get centralized configuration
+        fairness_config = get_fairness_config()
+        
+        # Initialize with defaults from centralized config
+        self.config = config or {}
         self.bias_detector = bias_detector or BiasDetector()
         self.results = None
+        
+        # Load visualization settings from config or centralized settings
+        self.color_palette = self.config.get(
+            'color_palette',
+            fairness_config.get('visualization', 'color_palette', default='colorblind')
+        )
+        
+        self.chart_types = self.config.get(
+            'chart_types',
+            fairness_config.get('visualization', 'chart_types', 
+                              default=['bar', 'heatmap', 'scatter', 'line'])
+        )
+        
+        self.default_chart = self.config.get(
+            'default_chart',
+            fairness_config.get('visualization', 'default_chart', default='bar')
+        )
+        
+        self.decimal_places = self.config.get(
+            'decimal_places',
+            fairness_config.get('visualization', 'decimal_places', default=3)
+        )
+        
+        # Maximum items to display per page for memory efficiency
+        self.max_items = self.config.get(
+            'max_items',
+            fairness_config.get('reporting', 'max_results_per_page', default=1000)
+        )
         
     def load_results(self, results_dict: Dict = None, results_file: str = None) -> None:
         """

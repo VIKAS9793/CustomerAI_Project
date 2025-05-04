@@ -1,0 +1,98 @@
+{
+  "_comment": "CustomerAI Fairness Framework Configuration - Replace with your organization's values",
+  
+  "thresholds": {
+    "_comment": "Set fairness thresholds based on your organization's policies and regulatory requirements",
+    "disparate_impact": 0.8,           // Standard 80% rule - financial services might use 0.9
+    "statistical_parity_difference": 0.1,  // Maximum acceptable difference in outcomes
+    "equal_opportunity_difference": 0.1,   // Maximum acceptable difference in true positive rates
+    "predictive_parity_difference": 0.1    // Maximum acceptable difference in positive predictive values
+  },
+  
+  "significance": {
+    "_comment": "Statistical significance settings - adjust based on your risk tolerance",
+    "pvalue_threshold": 0.05,        // Standard significance level - stricter policies might use 0.01
+    "confidence_interval": 0.95      // 95% confidence interval - critical applications might use 0.99
+  },
+  
+  "reporting": {
+    "_comment": "Reporting and alerting settings",
+    "severity_levels": {
+      "high": 0.2,      // Difference > 0.2 is high severity
+      "medium": 0.1,    // Difference > 0.1 is medium severity
+      "low": 0.05       // Difference > 0.05 is low severity
+    },
+    "include_recommendations": true,  // Set to false to disable automatic recommendations
+    "max_results_per_page": 1000     // Adjust based on your system's memory constraints
+  },
+  
+  "mitigation": {
+    "_comment": "Bias mitigation strategy settings - customize based on your use case",
+    "default_strategy": "reweighing",  // Choose default strategy appropriate for your domain
+    "available_strategies": [
+      "reweighing",                    // Adjusts instance weights to ensure fairness
+      "disparate_impact_remover",      // Transforms features to remove correlation with protected attributes
+      "equalized_odds",                // Adjusts thresholds to equalize error rates
+      "calibrated_equalized_odds",     // Calibrated version of equalized odds
+      "reject_option_classification", // Introduces critical region for decision making
+      "balanced_sampling"              // Resamples data to balance protected groups
+    ],
+    "strategy_params": {
+      "_comment": "Parameters for each mitigation strategy - tune for your specific data",
+      "reweighing": {
+        "weight_bound": 10.0           // Maximum weight multiplier - adjust based on data distribution
+      },
+      "disparate_impact_remover": {
+        "repair_level": 1.0            // Repair level (0.0 to 1.0) - higher values enforce stronger fairness
+      },
+      "adversarial_debiasing": {
+        "learning_rate": 0.001,        // Learning rate for adversarial training
+        "predictor_hidden_units": [64, 32], // Neural network architecture for predictor
+        "adversary_hidden_units": [32],    // Neural network architecture for adversary
+        "batch_norm": true,           // Whether to use batch normalization
+        "dropout_rate": 0.2           // Dropout rate for regularization
+      }
+    }
+  },
+  
+  "visualization": {
+    "_comment": "Visualization settings - customize for your organization's preferences",
+    "color_palette": "colorblind",    // Options: colorblind, viridis, plasma, or custom
+    "custom_colors": ["#1A73E8", "#EA4335", "#FBBC04", "#34A853", "#5F6368"], // Example corporate colors
+    "chart_types": ["bar", "heatmap", "scatter", "line"],
+    "default_chart": "bar",
+    "decimal_places": 3,              // Precision for displayed metrics
+    "show_logo": false,               // Set to true to display your organization's logo
+    "logo_path": "/static/logo.png"   // Path to your organization's logo
+  },
+  
+  "api": {
+    "_comment": "API settings - adjust based on your infrastructure and load requirements",
+    "rate_limit": 100,               // Requests per minute - increase for high-traffic applications
+    "max_payload_size_mb": 10,        // Maximum payload size - adjust based on your data size
+    "cache_ttl_seconds": 300,         // Cache time-to-live - adjust based on data update frequency
+    "enable_compression": true,        // Enable response compression
+    "compression_threshold_kb": 100,   // Minimum size for compression
+    "timeout_seconds": 30             // API timeout - adjust based on expected processing time
+  },
+  
+  "ml_integration": {
+    "_comment": "Machine learning framework integration settings",
+    "framework": "tensorflow",         // Options: tensorflow, pytorch, scikit-learn
+    "version": "2.4.0",               // Minimum version required
+    "gpu_enabled": false,             // Set to true to enable GPU acceleration
+    "model_cache_size": 5,            // Number of models to keep in memory
+    "batch_processing": true,         // Enable batch processing for large datasets
+    "max_batch_size": 1000            // Maximum batch size for processing
+  },
+  
+  "security": {
+    "_comment": "Security settings - configure according to your security policies",
+    "enable_authentication": true,     // Set to true to require authentication
+    "auth_provider": "oauth2",         // Options: oauth2, api_key, jwt
+    "token_expiry_minutes": 60,       // Token expiration time
+    "require_https": true,            // Require HTTPS for API requests
+    "cors_allowed_origins": ["*"],    // CORS allowed origins - restrict in production
+    "log_sensitive_data": false       // Whether to log potentially sensitive data
+  }
+}

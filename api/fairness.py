@@ -18,6 +18,8 @@ from src.utils.date_provider import DateProvider
 
 from src.fairness.bias_detector import BiasDetector
 from src.fairness.mitigation import FairnessMitigation
+from src.config.fairness_config import get_fairness_config
+from src.utils.date_provider import DateProvider
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -29,9 +31,17 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-# Initialize components
+# Load configuration
+fairness_config = get_fairness_config()
+
+# Initialize components with configuration
 bias_detector = BiasDetector()
 fairness_mitigation = FairnessMitigation()
+
+# API rate limiting settings from configuration
+RATE_LIMIT = fairness_config.get('api', 'rate_limit', default=100)  # requests per minute
+MAX_PAYLOAD_SIZE_MB = fairness_config.get('api', 'max_payload_size_mb', default=10)
+CACHE_TTL_SECONDS = fairness_config.get('api', 'cache_ttl_seconds', default=300)
 
 # Helper function for API responses
 def create_response(data: Any = None, error: bool = False, status_code: int = 200, 

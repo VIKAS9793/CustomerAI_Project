@@ -214,8 +214,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -228,6 +227,48 @@ services:
           memory: 1G
     labels:
       - "com.customerai.service=redis"
+      - "com.customerai.environment=${ENVIRONMENT:-dev}"
+
+  fairness-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customerai-fairness-dashboard:latest
+    container_name: customerai-fairness-dashboard
+    restart: unless-stopped
+    ports:
+      - "8502:8501"
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - api
+      - postgres
+    command: ["python", "-m", "streamlit", "run", "src/fairness/dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=fairness-dashboard
+      - OTEL_SERVICE_NAME=customerai-fairness-dashboard
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    labels:
+      - "com.customerai.service=fairness-dashboard"
       - "com.customerai.environment=${ENVIRONMENT:-dev}"
 
   prometheus:

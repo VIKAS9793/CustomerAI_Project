@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
 from src.utils.date_provider import DateProvider
+from src.config.fairness_config import get_fairness_config
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -36,19 +37,55 @@ class BiasDetector:
         
         Args:
             config: Optional configuration dictionary with parameters:
-                - significance_level: Statistical significance threshold (default: 0.05)
-                - fairness_threshold: Threshold for fairness metrics (default: 0.8)
+                - significance_level: Statistical significance threshold
+                - fairness_threshold: Threshold for fairness metrics
                 - metrics: List of fairness metrics to compute
+                
+        If config is not provided, settings will be loaded from the centralized
+        configuration system, which can be customized by organizations.
         """
+        # Get centralized configuration
+        fairness_config = get_fairness_config()
+        
+        # Initialize with defaults from centralized config
         self.config = config or {}
-        self.significance_level = self.config.get('significance_level', 0.05)
-        self.fairness_threshold = self.config.get('fairness_threshold', 0.8)
-        self.metrics = self.config.get('metrics', [
+        
+        # Load significance level from config or centralized settings
+        self.significance_level = self.config.get(
+            'significance_level', 
+            fairness_config.get('significance', 'pvalue_threshold', default=0.05)
+        )
+        
+        # Load fairness threshold from config or centralized settings
+        self.fairness_threshold = self.config.get(
+            'fairness_threshold', 
+            fairness_config.get('thresholds', 'disparate_impact', default=0.8)
+        )
+        
+        # Load metrics from config or centralized settings
+        default_metrics = [
             'disparate_impact', 
             'statistical_parity', 
             'equal_opportunity',
             'predictive_parity'
-        ])
+        ]
+        self.metrics = self.config.get('metrics', default_metrics)
+        
+        # Load reporting settings
+        self.severity_levels = self.config.get(
+            'severity_levels',
+            fairness_config.get('reporting', 'severity_levels', default={
+                'high': 0.2,
+                'medium': 0.1,
+                'low': 0.05
+            })
+        )
+        
+        # Maximum results per page for memory efficiency
+        self.max_results_per_page = self.config.get(
+            'max_results_per_page',
+            fairness_config.get('reporting', 'max_results_per_page', default=1000)
+        )
         
         # Initialize results storage
         self.last_results = None

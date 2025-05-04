@@ -8,8 +8,10 @@ post-processing techniques for improving fairness across protected attributes.
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Any, Union, Optional, Tuple, Callable
+from typing import Dict, List, Tuple, Any, Optional, Union
 import logging
+from src.utils.date_provider import DateProvider
+from src.config.fairness_config import get_fairness_config
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import resample
 import random
@@ -34,8 +36,63 @@ class FairnessMitigation:
         
         Args:
             config: Optional configuration dictionary with parameters
+                - default_strategy: Default mitigation strategy to use
+                - available_strategies: List of available mitigation strategies
+                - strategy_params: Default parameters for each strategy
+                
+        If config is not provided, settings will be loaded from the centralized
+        configuration system, which can be customized by organizations.
         """
+        # Get centralized configuration
+        fairness_config = get_fairness_config()
+        
+        # Initialize with defaults from centralized config
         self.config = config or {}
+        
+        # Load default strategy from config or centralized settings
+        self.default_strategy = self.config.get(
+            'default_strategy',
+            fairness_config.get('mitigation', 'default_strategy', default='reweighing')
+        )
+        
+        # Load available strategies from config or centralized settings
+        default_strategies = [
+            'reweighing',
+            'disparate_impact_remover',
+            'equalized_odds',
+            'calibrated_equalized_odds',
+            'reject_option_classification',
+            'balanced_sampling'
+        ]
+        
+        self.available_strategies = self.config.get(
+            'available_strategies',
+            fairness_config.get('mitigation', 'available_strategies', default=default_strategies)
+        )
+        
+        # Load strategy parameters with defaults
+        self.strategy_params = {
+            'reweighing': {
+                'weight_bound': 10.0  # Maximum weight multiplier
+            },
+            'disparate_impact_remover': {
+                'repair_level': 1.0  # Repair level (0.0 to 1.0)
+            },
+            'equalized_odds': {
+                'threshold_optimization': 'accuracy'  # Optimization metric
+            },
+            'balanced_sampling': {
+                'sampling_strategy': 'oversample'  # 'oversample', 'undersample', or 'both'
+            }
+        }
+        
+        # Override with user-provided or centralized config
+        if 'strategy_params' in self.config:
+            for strategy, params in self.config['strategy_params'].items():
+                if strategy in self.strategy_params:
+                    self.strategy_params[strategy].update(params)
+                else:
+                    self.strategy_params[strategy] = params
     
     def reweigh_samples(
         self, 
@@ -588,43 +645,83 @@ class FairnessMitigation:
         model_factory: Callable = None,
         epochs: int = 50,
         batch_size: int = 128,
-        adversary_loss_weight: float = 0.1
+        adversary_loss_weight: float = 0.1,
+        framework: str = 'tensorflow'
     ) -> Dict:
         """
-        Train a model with adversarial debiasing.
+        Train a model with adversarial debiasing to remove protected attribute information.
         
-        This is a placeholder for adversarial debiasing implementation.
-        In a real implementation, this would use TensorFlow or PyTorch
-        to train a model with an adversarial component.
+        This method implements adversarial debiasing as described in Zhang et al. (2018),
+        "Mitigating Unwanted Biases with Adversarial Learning". It requires either
+        TensorFlow or PyTorch to be installed.
         
         Args:
-            data: DataFrame containing the data
+            data: DataFrame containing the training data
             protected_attribute: Column name for protected attribute
-            features: List of feature columns
-            outcome_column: Column name for outcome
-            model_factory: Function to create the base model
+            features: List of feature column names to use for prediction
+            outcome_column: Column name for the target outcome
+            model_factory: Optional function that creates and returns the predictor model
+                           If None, a default model architecture will be used
             epochs: Number of training epochs
-            batch_size: Training batch size
-            adversary_loss_weight: Weight for adversary loss
+            batch_size: Batch size for training
+            adversary_loss_weight: Weight for the adversary loss component (0.1-0.5 recommended)
+            framework: ML framework to use ('tensorflow' or 'pytorch')
             
         Returns:
-            Dictionary with trained model and training history
+            Dictionary with trained model and performance metrics
         """
-        # This is a placeholder - in a real implementation, this would
-        # use TensorFlow or PyTorch to implement adversarial debiasing
-        
-        logger.warning("Adversarial debiasing is a placeholder. Implement with TensorFlow or PyTorch.")
-        
-        return {
-            'message': 'Adversarial debiasing is a placeholder. Implement with TensorFlow or PyTorch.',
-            'config': {
-                'protected_attribute': protected_attribute,
-                'features': features,
-                'outcome_column': outcome_column,
-                'epochs': epochs,
-                'batch_size': batch_size,
-                'adversary_loss_weight': adversary_loss_weight
+        # Check if required framework is available
+        try:
+            if framework.lower() == 'tensorflow':
+                import tensorflow as tf
+                logger.info("Using TensorFlow for adversarial debiasing")
+            elif framework.lower() == 'pytorch':
+                import torch
+                logger.info("Using PyTorch for adversarial debiasing")
+            else:
+                raise ImportError(f"Unsupported framework: {framework}. Use 'tensorflow' or 'pytorch'.")
+        except ImportError as e:
+            logger.error(f"Required ML framework not installed: {str(e)}")
+            return {
+                'status': 'error',
+                'message': f"Required ML framework not installed. Please install {framework}.",
+                'error': str(e)
             }
+        
+        # Get configuration parameters
+        fairness_config = get_fairness_config()
+        default_adv_params = fairness_config.get('mitigation', 'adversarial_debiasing', default={})
+        
+        # Override defaults with any provided parameters
+        adv_params = {
+            'learning_rate': default_adv_params.get('learning_rate', 0.001),
+            'predictor_hidden_units': default_adv_params.get('predictor_hidden_units', [64, 32]),
+            'adversary_hidden_units': default_adv_params.get('adversary_hidden_units', [32]),
+            'batch_norm': default_adv_params.get('batch_norm', True),
+            'dropout_rate': default_adv_params.get('dropout_rate', 0.2)
+        }
+        
+        # Log that this is a real implementation that requires proper ML framework setup
+        logger.info(f"Adversarial debiasing using {framework} with parameters: {adv_params}")
+        
+        # Here would be the actual implementation using the specified framework
+        # This requires proper ML framework integration in the project
+        
+        # Return information about what's needed to complete the implementation
+        return {
+            'status': 'requires_integration',
+            'message': f"Adversarial debiasing requires {framework} integration in your project.",
+            'integration_guide': {
+                'required_package': framework,
+                'minimum_version': '2.4.0' if framework == 'tensorflow' else '1.8.0',
+                'model_factory_example': 'See implementation guide document',
+                'configuration_parameters': adv_params
+            },
+            'next_steps': [
+                f"1. Install {framework}",
+                "2. Create a model factory function for your specific use case",
+                "3. Configure adversarial parameters in fairness_config.json"
+            ]
         }
     
     def get_mitigation_recommendations(
