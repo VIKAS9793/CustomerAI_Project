@@ -2,8 +2,10 @@ version: '3.8'
 
 services:
   api:
-    build: .
-    image: customerai-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customerai-api:latest
     container_name: customerai-api
     restart: unless-stopped
     ports:
@@ -11,24 +13,51 @@ services:
     volumes:
       - ./:/app
       - ./data:/app/data
+      - models-volume:/app/models
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ["./docker-entrypoint.sh", "api"]
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
+      - SERVICE_NAME=api
+      - LOG_LEVEL=INFO
+      - MAX_WORKERS=4
+      - ENABLE_CORS=true
+      - OTEL_SERVICE_NAME=customerai-api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    labels:
+      - "com.customerai.service=api"
+      - "com.customerai.environment=${ENVIRONMENT:-dev}"
 
   dashboard:
-    build: .
-    image: customerai-dashboard
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customerai-dashboard:latest
     container_name: customerai-dashboard
     restart: unless-stopped
     ports:
@@ -36,14 +65,122 @@ services:
     volumes:
       - ./:/app
       - ./data:/app/data
+      - models-volume:/app/models
     env_file:
       - .env
     depends_on:
       - api
     command: ["./docker-entrypoint.sh", "dashboard"]
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=dashboard
+      - OTEL_SERVICE_NAME=customerai-dashboard
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    labels:
+      - "com.customerai.service=dashboard"
+      - "com.customerai.environment=${ENVIRONMENT:-dev}"
+
+  ml-inference:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customerai-inference:latest
+    container_name: customerai-inference
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+      - models-volume:/app/models
+    env_file:
+      - .env
+    depends_on:
+      - api
+      - redis
+    command: ["./docker-entrypoint.sh", "inference"]
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=inference
+      - MODEL_CACHE_SIZE=1G
+      - BATCH_SIZE=16
+      - OTEL_SERVICE_NAME=customerai-inference
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          cpus: '1'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    labels:
+      - "com.customerai.service=inference"
+      - "com.customerai.environment=${ENVIRONMENT:-dev}"
+
+  # Uncomment for GPU support
+  # ml-inference-gpu:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: gpu-runtime
+  #   image: customerai-inference-gpu:latest
+  #   container_name: customerai-inference-gpu
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8081:8080"
+  #   volumes:
+  #     - ./:/app
+  #     - ./data:/app/data
+  #     - models-volume:/app/models
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - api
+  #     - redis
+  #   command: ["./docker-entrypoint.sh", "inference"]
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #     - SERVICE_NAME=inference-gpu
+  #     - MODEL_CACHE_SIZE=8G
+  #     - BATCH_SIZE=32
+  #     - USE_GPU=true
+  #     - OTEL_SERVICE_NAME=customerai-inference-gpu
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
 
   postgres:
-    image: postgres:14
+    image: postgres:15-alpine
     container_name: customerai-postgres
     restart: unless-stopped
     environment:
@@ -54,15 +191,44 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    labels:
+      - "com.customerai.service=postgres"
+      - "com.customerai.environment=${ENVIRONMENT:-dev}"
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: customerai-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    labels:
+      - "com.customerai.service=redis"
+      - "com.customerai.environment=${ENVIRONMENT:-dev}"
 
   prometheus:
     image: prom/prometheus:latest
@@ -78,6 +244,73 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    labels:
+      - "com.customerai.service=prometheus"
+      - "com.customerai.component=monitoring"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: customerai-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    labels:
+      - "com.customerai.service=grafana"
+      - "com.customerai.component=monitoring"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: customerai-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    labels:
+      - "com.customerai.service=jaeger"
+      - "com.customerai.component=tracing"
 
   nginx:
     image: nginx:alpine
@@ -89,11 +322,29 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./ssl:/etc/nginx/ssl
+      - ./static:/usr/share/nginx/html/static
     depends_on:
       - api
       - dashboard
+      - ml-inference
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    labels:
+      - "com.customerai.service=nginx"
+      - "com.customerai.component=gateway"
 
 volumes:
   postgres_data:
   redis_data:
-  prometheus_data: 
+  prometheus_data:
+  grafana_data:
+  models-volume:
+    driver: local 
