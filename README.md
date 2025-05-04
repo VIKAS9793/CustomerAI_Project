@@ -69,7 +69,7 @@ This platform bridges the gap between AI capabilities and enterprise cloud infra
 Get up and running with CustomerAI Insights Platform in minutes:
 
 ### 1. Prerequisites
-- Python 3.8+ 
+- Python 3.12 
 - pip (Python package manager)
 - Git
 

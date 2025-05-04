@@ -1,9 +1,10 @@
+# Python 3.12 compatibility
 # Core dependencies
 fastapi>=0.95.0
 uvicorn>=0.21.1
-pydantic>=1.10.7
+pydantic>=2.0.0  # Updated for Python 3.12 compatibility
 python-dotenv>=1.0.0
-pandas>=1.5.3
+pandas>=2.0.0  # Updated for Python 3.12 compatibility
 numpy>=1.24.2
 scikit-learn>=1.2.2
 streamlit>=1.21.0
@@ -75,18 +76,19 @@ pytest-cov>=4.1.0
 # Web framework
 streamlit-extras==0.2.7
 plotly==5.9.0
-matplotlib==3.6.0
-starlette==0.19.1
+matplotlib>=3.6.0  # Updated for compatibility
+starlette>=0.19.1  # Updated for compatibility with FastAPI
 python-multipart==0.0.5
 
 # Utilities
-tenacity==8.0.1
-pydantic[email]==1.9.1
-structlog==22.1.0
-python-json-logger==2.0.4
+tenacity>=8.0.1  # Updated for compatibility
+pydantic-extra-types>=2.0.0  # Added for pydantic v2 compatibility
+pydantic-settings>=2.0.0  # Added for pydantic v2 compatibility
+structlog>=22.1.0
+python-json-logger>=2.0.4
 
 # Linting & Type Checking
-mypy==0.971
-black==22.6.0
-flake8==5.0.4
-isort==5.10.1 
+mypy>=0.971
+black>=22.6.0
+flake8>=5.0.4
+isort>=5.10.1 

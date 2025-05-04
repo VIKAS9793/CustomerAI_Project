@@ -6,6 +6,13 @@ echo "Starting CustomerAI Insights Platform"
 echo "Environment: $ENVIRONMENT"
 echo "Python: $(python --version)"
 
+# Verify Python version is at least 3.12
+if ! python -c "import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)"; then
+    echo "ERROR: Python 3.12 or higher is required. Current version: $(python --version)"
+    echo "Please update your Python installation or use a compatible container image."
+    exit 1
+fi
+
 # Create required directories
 mkdir -p /var/log/customerai
 mkdir -p /data

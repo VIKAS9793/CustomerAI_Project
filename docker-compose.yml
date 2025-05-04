@@ -17,6 +17,14 @@ services:
       - postgres
       - redis
     command: ["./docker-entrypoint.sh", "api"]
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   dashboard:
     build: .

@@ -1,5 +1,5 @@
 # Use a specific Python version for reproducibility
-FROM python:3.9-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Set environment variables
 ENV PYTHONFAULTHANDLER=1 \
@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     safety
 
 # For the actual application, use a smaller base image
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 # Set environment variables 
 ENV PYTHONFAULTHANDLER=1 \
@@ -53,7 +53,7 @@ WORKDIR /app
 USER app
 
 # Copy Python dependencies from builder image
-COPY --from=builder --chown=app:app /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=builder --chown=app:app /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder --chown=app:app /usr/local/bin /usr/local/bin
 
 # Copy the application code
