@@ -96,7 +96,7 @@ The CustomerAI Insights Platform is designed for multiple industries:
 ## Getting Started
 
 ### Prerequisites
-- Python 3.12
+- Python 3.10
 - Docker and Docker Compose
 - AWS, Azure, or GCP account (depending on deployment target)
 
@@ -247,7 +247,7 @@ The MIT License applies only to the original code in this project, not to any th
 Get up and running with CustomerAI Insights Platform in minutes:
 
 ### 1. Prerequisites
-- Python 3.12 
+- Python 3.10 
 - pip (Python package manager)
 - Git
 
