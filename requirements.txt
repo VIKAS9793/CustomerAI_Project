@@ -24,17 +24,84 @@ jax>=0.4.20  # Added JAX for high-performance machine learning
 ray>=2.9.0  # Added Ray for distributed AI workloads
 
 # MLOps and AI-specific libraries
-mlflow>=2.10.0  # New: MLOps lifecycle management
-huggingface_hub>=0.20.0  # New: Access pre-trained models
-deepspeed>=0.12.0  # New: Large model optimization
-triton>=2.2.0  # New: NVIDIA acceleration for AI inference
+mlflow>=2.10.0  # MLOps lifecycle management
+huggingface_hub>=0.20.0  # Model hub integration
+optuna>=3.5.0  # Hyperparameter optimization
+wandb>=0.16.0  # Experiment tracking
+
+# LLM and embeddings
+openai>=1.10.0  # OpenAI API
+langchain>=0.1.10  # For LLM workflows
+langchain-openai>=0.0.5  # OpenAI integration
+langchain-anthropic>=0.1.0  # Anthropic integration
+langchain-google-genai>=0.0.5  # Google Gemini integration
+langchain-community>=0.0.15  # Community integrations
+tiktoken>=0.5.1  # Token counting for OpenAI models
+tenacity>=8.2.3  # Retry logic for API calls
+backoff>=2.2.1  # Exponential backoff
+
+# Vector databases
+faiss-cpu>=1.7.4
+pgvector>=0.2.3  # PostgreSQL vector extension client
+redis>=5.0.0
+pymongo>=4.6.0
+
+# Human-in-the-loop components
+databases[postgresql,sqlite]>=0.8.0  # Async database support
+asyncpg>=0.28.0  # PostgreSQL async driver
+psycopg2-binary>=2.9.7  # PostgreSQL sync driver
+slack_sdk>=3.21.3  # Slack integration for notifications
+streamlit-extras>=0.3.5  # Enhanced Streamlit components
+streamlit-calendar>=1.1.0  # Calendar component for reviewer scheduling
+watchdog>=3.0.0  # For file monitoring
+
+# Document processing
+pypdf>=3.15.1  # PDF processing
+python-docx>=1.0.1  # Word document processing
+openpyxl>=3.1.2  # Excel processing
+beautifulsoup4>=4.12.0  # HTML parsing
+markdown>=3.5.0  # Markdown processing
+
+# Email integration
+fastapi-mail>=1.4.1  # Email sending
+jinja2>=3.1.2  # Email templates
+
+# Data visualization
+plotly==5.18.0
+matplotlib==3.8.0
+seaborn==0.13.0
+altair==5.2.0  # Added for fairness visualizations
+scipy==1.12.0  # Added for statistical tests in fairness module
+
+# Model explainability and fairness
+shap>=0.42.1  # Model explainability
+lime>=0.2.0.1  # Local explainability
+fairlearn>=0.9.0  # Fairness metrics
+alibi>=0.9.4  # ML explanation and monitoring
+
+# Security
+bandit>=1.7.5  # Security linting
+safety>=2.3.5  # Dependency security
+pyjwt>=2.8.0  # JWT for authentication
+
+# Testing and validation
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+faker>=22.0.0  # Generate fake data
+hypothesis>=6.91.0  # Property-based testing
+
+# Kubernetes integration
+kubernetes>=28.1.0  # K8s API client
+
+# Observability
+opentelemetry-api>=1.21.0
+opentelemetry-sdk>=1.21.0
+prometheus-client>=0.17.0
+opentelemetry-exporter-prometheus>=1.21.0
 
 # Database
 sqlalchemy>=2.0.25
 alembic>=1.13.0
-psycopg2-binary>=2.9.9
-pymongo>=4.6.0
-redis>=5.0.0
 
 # Security
 authlib>=1.2.1
@@ -43,16 +110,11 @@ aioredis>=2.0.1
 itsdangerous>=2.1.2
 
 # Monitoring and Observability
-prometheus_client>=0.18.0
-opentelemetry-api>=1.23.0
-opentelemetry-sdk>=1.23.0
-opentelemetry-exporter-otlp>=1.23.0  # New: OTLP exporters for observability
 grafana-agent>=0.38.0
 jaeger-client>=4.9.0  # New: Distributed tracing
 datadog>=0.48.0  # New: Production monitoring
 
 # Kubernetes integration
-kubernetes>=29.0.0  # New: Kubernetes Python client
 kfp>=2.4.0  # New: Kubeflow Pipelines SDK
 seldon-core>=1.16.0  # New: Model deployment on Kubernetes
 kubeflow-katib>=0.16.0  # New: Automated ML on Kubernetes
@@ -88,18 +150,13 @@ sphinx>=7.2.0
 sphinx-rtd-theme>=1.3.0
 
 # Testing
-pytest-cov>=4.1.0
 pytest-benchmark>=4.0.0  # New: Performance testing
 
 # Web framework
-streamlit-extras>=0.3.5
-plotly>=5.18.0
-matplotlib>=3.8.0
 starlette>=0.36.3  # Updated for compatibility with FastAPI
 python-multipart>=0.0.6
 
 # Utilities
-tenacity>=8.2.3
 pydantic-extra-types>=2.3.0
 pydantic-settings>=2.1.0
 structlog>=24.1.0
@@ -120,13 +177,8 @@ isort>=5.13.0
 ruff>=0.2.0  # New: Fast Python linter
 
 # LLM and ML Libraries
-openai>=1.20.0         # OpenAI GPT-4o and embeddings API
 anthropic>=0.15.0      # Anthropic Claude API
 google-generativeai>=0.3.2  # Google Gemini API
-langchain>=0.2.0       # Framework for building LLM applications
-langchain-openai>=0.1.0  # LangChain OpenAI integration
-langchain-anthropic>=0.1.1  # LangChain Anthropic integration
-langchain-google-genai>=0.1.0  # LangChain Google integration
 sentence-transformers>=2.5.0  # Local embeddings models
 cohere>=5.0.0          # Cohere API for embeddings and generation
 llama-index>=0.10.0    # Framework for building RAG systems

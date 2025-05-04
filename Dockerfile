@@ -27,88 +27,130 @@ RUN pip install "poetry==$POETRY_VERSION"
 # Set working directory
 WORKDIR /app
 
-# Copy only requirements to cache them in docker layer
-COPY requirements.txt /app/
+# Copy only the dependency files first for better caching
+COPY pyproject.toml poetry.lock* ./
 
-# Project initialization:
-RUN pip install --no-cache-dir wheel setuptools && \
-    pip install --no-cache-dir -r requirements.txt \
-    && pip install gunicorn \
-    # Install security packages
-    && pip install argon2-cffi \
-    bandit \
-    safety
+# Configure poetry to not use a virtual environment and install dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-dev
 
-# For the actual application, use a clean base image
-FROM python:3.12-slim
+# Now copy the rest of the application
+COPY . .
 
-LABEL maintainer="Vikas Sahani <vikassahani17@gmail.com>" \
-      org.opencontainers.image.source="https://github.com/VIKAS9793/CustomerAI_Project" \
-      org.opencontainers.image.description="CustomerAI Insights Platform: Enterprise-ready AI for customer analytics" \
-      org.opencontainers.image.licenses="MIT"
+# Build stage for production
+FROM python:3.12-slim AS production
 
-# Set environment variables 
+# Set environment variables
 ENV PYTHONFAULTHANDLER=1 \
-    PYTHONHASHSEED=random \
     PYTHONUNBUFFERED=1 \
-    # Set Python to run in production mode
-    PYTHON_ENV=production \
-    # Set timezone
-    TZ=UTC
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install runtime dependencies
+# Install system dependencies including those for onnxruntime-gpu
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
+    libgomp1 \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    # Required for OpenAI's tiktoken
+    build-essential \
+    # Required for PostgreSQL
+    libpq-dev \
+    # For Redis
+    redis-tools \
+    # For security
     ca-certificates \
-    tini \
+    # For node-based frontends
+    curl \
+    # For modern cryptography
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
-    # Set timezone
-    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+    # Install node for the modern web interface (human review dashboard)
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    # Create a non-root user
+    && adduser --disabled-password --gecos "" app
 
-# Create a non-root user and working directory
-RUN adduser --disabled-password --gecos "" app
+# Set working directory
 WORKDIR /app
+
+# Copy from builder stage
+COPY --from=builder /app /app
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Install additional packages for human-in-the-loop and AI safety
+RUN pip install --no-cache-dir \
+    tiktoken>=0.5.1 \
+    pypdf>=3.15.1 \
+    slack-sdk>=3.21.3 \
+    # Database dependencies for the review system
+    databases[postgresql,sqlite]>=0.8.0 \
+    psycopg2-binary>=2.9.7 \
+    asyncpg>=0.28.0 \
+    # Modern cryptography for token handling
+    cryptography>=42.0.0 \
+    # Explainability tools
+    shap>=0.42.1 \
+    lime>=0.2.0.1 \
+    # Frontend for human review dashboard
+    streamlit>=1.32.0 \
+    # Healthcheck
+    pytest-timeout>=2.1.0
+
+# Set up the model cards directory
+RUN mkdir -p /app/data/model_cards /app/data/human_feedback && \
+    chown -R app:app /app/data
+
+# Application port
+EXPOSE 8000
+# Review dashboard port
+EXPOSE 8501
+
+# Switch to non-root user
 USER app
 
-# Copy Python dependencies from builder image
-COPY --from=builder --chown=app:app /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder --chown=app:app /usr/local/bin /usr/local/bin
-
-# Copy the application code
-COPY --chown=app:app . /app/
-
-# Security: remove unnecessary files
-RUN find /app -type d -name __pycache__ -exec rm -rf {} +
-
-# Create necessary directories with proper permissions
-RUN mkdir -p /app/data/cache /app/logs /app/models
-
-# Switch back to root to run the entry script
-USER root
-
-# Set file permissions
-RUN chmod -R 755 /app && \
-    chmod 444 /app/requirements.txt && \
-    chmod 444 /app/Dockerfile && \
-    chmod +x /app/docker-entrypoint.sh && \
-    # Run security checks - fail only on critical issues
-    bandit -r /app -x /app/tests/ -ll || true
-
-# Switch back to non-root user for running the app
-USER app
-
-# Set container health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Expose the application port
-EXPOSE 8000
+# Set up entrypoint
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
-# Use tini as entrypoint to properly handle signals and zombie processes
-ENTRYPOINT ["/usr/bin/tini", "--", "/app/docker-entrypoint.sh"]
+# Default command
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-# Default to running API server
-CMD ["api"]
+
+# GPU-enabled build for inference
+FROM production AS gpu
+
+USER root
+
+# Install CUDA dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    gnupg2 \
+    && wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.0-1_all.deb \
+    && dpkg -i cuda-keyring_1.0-1_all.deb \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        cuda-minimal-build-11-8 \
+        libcudnn8 \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm cuda-keyring_1.0-1_all.deb
+
+# Install GPU-enabled packages
+RUN pip install --no-cache-dir \
+    torch>=2.2.0 --extra-index-url https://download.pytorch.org/whl/cu118 \
+    onnxruntime-gpu>=1.16.0 \
+    tensorflow>=2.15.0 \
+    triton>=2.1.0
+
+# Switch back to app user
+USER app
+
+# Set environment variables for GPU use
+ENV CUDA_VISIBLE_DEVICES=0
 
 # -------------------- GPU SUPPORT (Optional) --------------------
 # FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04 AS gpu-runtime

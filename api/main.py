@@ -13,6 +13,7 @@ import uvicorn
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 import uuid
+from src.utils.date_provider import DateProvider
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -157,7 +158,7 @@ def create_response(data: Any = None, error: bool = False, status_code: int = 20
     response = {
         "error": error,
         "status_code": status_code,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": DateProvider.get_instance().iso_format()
     }
     
     if data is not None:
@@ -271,7 +272,7 @@ async def root():
 async def health_check():
     return {
         "status": "ok",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": DateProvider.get_instance().iso_format(),
         "version": "1.0.0"
     }
 
@@ -567,7 +568,7 @@ async def record_review_decision(request_data: Dict, token = Depends(validate_to
         return create_response({
             "item_id": item_id,
             "status": "reviewed",
-            "review_time": datetime.now().isoformat(),
+            "review_time": DateProvider.get_instance().iso_format(),
             "reviewer_id": token.get("sub", "unknown")
         })
     except HTTPException as e:
@@ -718,7 +719,16 @@ async def validate_device_security(request: Request, call_next):
 # OAuth2 password flow for token based authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+# Register API routers
+app.include_router(fairness_router)
+app.include_router(sentiment_router, prefix="/api/v1")
+app.include_router(response_gen_router, prefix="/api/v1")
+app.include_router(privacy_router, prefix="/api/v1")
+app.include_router(users_router, prefix="/api/v1")
+app.include_router(review_router, prefix="/api/v1")
+app.include_router(cloud_router, prefix="/api/v1")
+
 # Run the application
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True) 
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)

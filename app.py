@@ -8,6 +8,7 @@ import os
 import datetime
 from datetime import timedelta
 from dotenv import load_dotenv
+from src.utils.date_provider import DateProvider
 
 # Load environment variables
 load_dotenv()
@@ -82,7 +83,7 @@ def api_request(endpoint, method="GET", data=None, params=None):
                     "response_time_avg": 3.7,
                     "resolution_rate": 0.92,
                     "timeline_data": [
-                        {"date": (datetime.datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d"), 
+                        {"date": (datetime.DateProvider.get_instance().now() - timedelta(days=i)).strftime("%Y-%m-%d"), 
                          "conversations": int(400 - i * 10 + np.random.randint(-30, 30)), 
                          "avg_sentiment": 0.6 + np.random.random() * 0.2} 
                         for i in range(14)
@@ -106,7 +107,7 @@ def api_request(endpoint, method="GET", data=None, params=None):
                             "response": "Based on current market trends, diversification across sectors is recommended...",
                             "category": "investment_advice",
                             "priority": 2,
-                            "timestamp": (datetime.datetime.now() - timedelta(hours=i)).isoformat()
+                            "timestamp": (datetime.DateProvider.get_instance().now() - timedelta(hours=i)).isoformat()
                         } for i in range(1, 6)
                     ]
                 }
@@ -159,9 +160,9 @@ def dashboard_page():
     # Date filter
     col1, col2 = st.columns(2)
     with col1:
-        start_date = st.date_input("Start Date", datetime.datetime.now() - timedelta(days=14))
+        start_date = st.date_input("Start Date", datetime.DateProvider.get_instance().now() - timedelta(days=14))
     with col2:
-        end_date = st.date_input("End Date", datetime.datetime.now())
+        end_date = st.date_input("End Date", datetime.DateProvider.get_instance().now())
     
     # Get analytics data
     response = api_request(

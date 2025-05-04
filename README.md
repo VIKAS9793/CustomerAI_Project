@@ -2,43 +2,215 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A production-grade cloud infrastructure framework for integrating with AWS, Azure, and GCP services with robust error handling, retry mechanisms, metrics collection, connection pooling optimizations, enterprise security, observability, chaos testing, and deployment automation.
+A comprehensive cloud infrastructure framework that provides a unified interface for building and deploying customer analysis solutions across major cloud providers (AWS, Azure, GCP).
 
-## About CustomerAI Insights Platform
+## Overview
 
-### What is CustomerAI?
+The CustomerAI Insights Platform enables businesses to harness the power of AI for customer analytics while maintaining the highest standards of security, compliance, and governance. It provides a flexible, multi-cloud architecture that supports rapid development and deployment of customer analysis applications.
 
-CustomerAI Insights Platform is an enterprise-grade solution for analyzing customer data, generating insights, and automating customer engagement using artificial intelligence. The platform provides a unified approach to customer data analysis across multiple cloud providers (AWS, Azure, and GCP) with high reliability, security, and performance, now enhanced with advanced LLM integration capabilities supporting OpenAI, Anthropic, and Google models.
+## Key Features
 
-### Key Use Cases
+### Cloud Integration
+- **Multi-cloud Support**: Deploy on AWS, Azure, or GCP without vendor lock-in
+- **Infrastructure as Code**: Terraform modules for all supported cloud platforms
+- **Containerized Deployment**: Docker and Kubernetes integration
 
-- **Customer Sentiment Analysis**: Analyze customer feedback, support tickets, and social media mentions to understand sentiment trends using state-of-the-art LLMs optimized for financial contexts.
-- **Regulatory Compliance**: Ensure customer communications comply with industry regulations through automated review using specialized financial compliance LLMs.
-- **Personalized Customer Engagement**: Generate tailored customer responses and recommendations using various AI models selected for specific industry requirements.
-- **Document Processing & Understanding**: Analyze complex documents, contracts, and customer correspondence using specialized LLMs with dedicated document capabilities.
-- **Multi-provider LLM Orchestration**: Leverage the best capabilities of multiple AI providers with automated failover for maximum reliability and performance.
-- **Cross-cloud Data Analysis**: Analyze customer data across multiple cloud platforms without vendor lock-in.
+### AI and Machine Learning
+- **LLM Integration**: Flexible integration with leading Large Language Models
+  - OpenAI GPT-4o: State-of-the-art general purpose model
+  - Anthropic Claude 3.5 Sonnet: Advanced model with financial compliance capabilities
+  - Google Gemini 1.5 Pro: Multimodal AI with reasoning capabilities
+- **Custom ML Models**: Train and deploy specialized models for customer analytics
+- **Batch and Real-time Inference**: Support for both batch processing and real-time API
 
-### Target Industries
+### Human-in-the-Loop Framework
+- **AI Oversight System**: Tiered human review system for AI-generated content
+- **Review Dashboard**: Web interface for human reviewers to evaluate AI outputs
+- **Feedback Loops**: Human feedback incorporated into model improvements
+- **SLA Management**: Configurable service level agreements for review turnaround time
 
-- **Financial Services**: Banks, insurance companies, and fintech firms needing secure, compliant customer insights with specialized financial LLM capabilities
-- **Retail & E-commerce**: Online and brick-and-mortar retailers looking to enhance customer experience with personalized AI interactions
-- **Healthcare**: Provider organizations seeking to improve patient engagement while maintaining strict data security and HIPAA compliance
-- **Telecommunications**: Service providers analyzing customer satisfaction and reducing churn through AI-powered insights
-- **SaaS & Technology**: Software companies seeking to enhance customer experience and reduce support costs through intelligent automation
+### AI Safety and Governance
+- **Model Cards**: Comprehensive documentation of all models following industry standards
+- **LLM Guardrails**: Robust protection against harmful content, prompt injection, and other risks
+- **Responsible AI Framework**: Comprehensive governance structure aligned with NIST AI RMF and EU AI Act
+- **Enhanced Fairness Framework**: 
+  - Advanced bias detection with multiple fairness metrics (disparate impact, statistical parity, equal opportunity, predictive parity)
+  - Statistical significance testing with configurable thresholds for reliable bias detection
+  - Interactive fairness visualization dashboard with memory-efficient data handling for large datasets
+  - Comprehensive bias mitigation strategies:
+    - Pre-processing techniques (reweighing, balanced sampling)
+    - Post-processing adjustments (equalized odds, calibration)
+    - Adversarial debiasing capabilities
+  - Detailed fairness reporting with severity classifications and actionable insights
+  - RESTful API endpoints for fairness analysis, dataset upload, and mitigation strategy application
+  - Integration with existing ML pipelines through standardized interfaces
 
-### Technical Benefits
+### Security and Compliance
+- **Data Encryption**: End-to-end encryption for sensitive data
+- **Role-based Access Control**: Granular permissions for different user types
+- **Audit Logging**: Comprehensive logging of all system activities
+- **Compliance Certifications**: Designed for GDPR, CCPA, SOC 2, and industry-specific regulations
 
-- **Flexible LLM Integration**: Support for multiple LLM providers (OpenAI, Anthropic, Google) with easy switching between models
-- **Model Specialization**: Configure different models for different tasks based on their strengths and compliance requirements
-- **Unified Multi-cloud Approach**: Consistent interface for working with AWS, Azure, and GCP
-- **Enterprise-grade Security**: Advanced encryption, IAM integration, and security best practices for AI deployments
-- **Production Resilience**: Automatic retry mechanisms, circuit breakers, and fallback paths between LLM providers
-- **Scalable Architecture**: Connection pooling, performance optimization, and load testing tools
-- **Comprehensive Observability**: Metrics collection, Prometheus integration, and monitoring capabilities
-- **Infrastructure as Code**: Terraform integration for reliable deployment across environments
+### Observability
+- **Performance Monitoring**: Real-time dashboards for system performance
+- **Model Metrics**: Tracking of model accuracy, drift, and other quality indicators
+- **Alerting System**: Proactive notifications of potential issues
+- **Distributed Tracing**: End-to-end tracing of requests through the system
 
-This platform bridges the gap between advanced AI/LLM capabilities and enterprise cloud infrastructure requirements, making it possible to deploy sophisticated customer analytics in a production-ready, multi-cloud environment with multiple AI providers.
+## Use Cases
+
+The CustomerAI Insights Platform is designed for multiple industries:
+
+### Financial Services
+- Regulatory compliance monitoring with human oversight
+- Customer sentiment analysis with explainable AI
+- Risk assessment with model cards for regulatory transparency
+- Fraud detection with protected group fairness monitoring
+
+### Retail
+- Customer journey analysis with multimodal processing
+- Product recommendation systems with intervention capabilities
+- Customer support automation with human escalation paths
+- Voice of customer analytics with guard rails against misrepresentation
+
+### Healthcare
+- Patient experience analysis with PHI protection
+- Clinical document analysis with medical expert oversight
+- Care quality monitoring with governance documentation
+- Patient engagement systems with safety verification
+
+### Telecommunications
+- Network experience analysis with privacy safeguards
+- Churn prediction with demographic fairness monitoring
+- Customer support optimization with oversight protections
+- Service personalization with explainability requirements
+
+### SaaS Companies
+- User behavior analysis with strong user privacy controls
+- Feature usage tracking with implementation explainability
+- Feedback processing with bias mitigation
+- Customer success prediction with human verification
+
+## Getting Started
+
+### Prerequisites
+- Python 3.12
+- Docker and Docker Compose
+- AWS, Azure, or GCP account (depending on deployment target)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/VIKAS9793/CustomerAI_Project.git
+cd CustomerAI_Project
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Configure environment variables:
+```bash
+cp env.example .env
+# Edit .env with your configuration
+```
+
+4. Run the development server:
+```bash
+python -m uvicorn main:app --reload
+```
+
+### Docker Deployment
+
+For production deployment:
+
+```bash
+docker-compose up -d
+```
+
+## Human-in-the-Loop Configuration
+
+The human review system provides tiered oversight for AI-generated content:
+
+1. Configure review thresholds in `config/review_config.json`
+2. Set up reviewer roles and permissions in the admin dashboard
+3. Access the review interface at `http://your-deployment/review`
+4. Connect notification systems (Slack, Email) in the `.env` file
+
+Learn more in the [Human Review Documentation](docs/HUMAN_REVIEW.md).
+
+## LLM Integration
+
+The CustomerAI Insights Platform includes a flexible LLM integration system that supports multiple providers:
+
+- **OpenAI GPT-4o**: State-of-the-art general purpose model for text generation and analysis
+- **Anthropic Claude 3.5 Sonnet**: Advanced model with strong performance in financial compliance
+- **Google Gemini 1.5 Pro**: Powerful multimodal AI model with reasoning capabilities
+
+The system allows developers to:
+
+1. **Configure multiple LLM providers** through a simple JSON configuration file
+2. **Select models based on specific use cases** (sentiment analysis, document processing, etc.)
+3. **Implement compliance requirements** for different regulatory environments
+4. **Fallback mechanisms** when primary models are unavailable
+5. **Cost management** through intelligent routing and caching
+
+> **Disclaimer for Developers**: The LLM integration system is designed to be highly customizable according to your specific business requirements and use cases. Developers have complete flexibility to configure token limits, model selection, temperature settings, system prompts, and other parameters for each provider. This allows for optimizing different aspects such as cost management, inference speed, output quality, and regulatory compliance based on your organization's priorities.
+
+For implementation details, see [LLM Integration Guide](docs/LLM_INTEGRATION.md).
+
+## AI Governance
+
+This platform implements a comprehensive AI governance framework aligned with industry standards:
+
+- **NIST AI Risk Management Framework**: Following the structured approach to AI risk
+- **EU AI Act Compliance**: Meeting requirements for high-risk AI systems
+- **Model Documentation**: Standardized model cards for all deployed models
+- **Responsible AI Principles**: Comprehensive implementation of fairness, transparency, and safety
+
+For details, see [AI Governance Documentation](docs/AI_GOVERNANCE.md).
+
+## Contributing
+
+Contributions are welcome! Please check out our [contribution guidelines](CONTRIBUTING.md).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+The MIT License applies only to the original code in this project, not to any third-party dependencies. See [DEPENDENCIES.md](DEPENDENCIES.md) for details on third-party components and their licenses.
+
+## Author
+
+**Vikas Sahani**
+- GitHub: [https://github.com/VIKAS9793](https://github.com/VIKAS9793)
+- Email: vikassahani17@gmail.com
+
+## Acknowledgments
+
+- This project implements industry best practices for cloud service integration and resilience patterns
+- Inspired by enterprise-grade connection pooling and retry mechanisms
+
+### Key Technologies
+
+- **Python 3.12**: Latest stable Python version with improved performance and features
+- **Modern AI & ML Stack**:
+  - **JAX**: High-performance numerical computing with automatic differentiation
+  - **Ray**: Distributed computing framework for scaling AI/ML workloads
+  - **MLflow**: Platform for managing ML lifecycle including tracking, deployment
+  - **Hugging Face Transformers**: State-of-the-art NLP models and tools
+  - **DeepSpeed**: Optimization library for large-scale model training
+- **Kubernetes Integration**: 
+  - Native deployment on Kubernetes clusters
+  - Kubeflow Pipelines for ML workflows
+  - Seldon Core for model serving
+- **Observability**:
+  - OpenTelemetry for distributed tracing
+  - Prometheus & Grafana for metrics visualization
+  - Jaeger for end-to-end tracing
+- **Cloud Provider SDKs**: Latest versions of AWS, Azure, and GCP Python SDKs
 
 ## Table of Contents
 - [Quick Start Guide](#quick-start-guide)
@@ -1154,13 +1326,7 @@ pool_manager.set_default_config(
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please check out our [contribution guidelines](CONTRIBUTING.md).
 
 ## License
 

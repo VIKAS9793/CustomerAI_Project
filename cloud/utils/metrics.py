@@ -20,6 +20,7 @@ from typing import Dict, List, Any, Callable, Optional, TypeVar, Union
 from datetime import datetime, timedelta
 from enum import Enum
 import json
+from src.utils.date_provider import DateProvider
 
 from cloud.config import CloudProvider
 
@@ -435,7 +436,7 @@ class MetricsManager:
             report.append("CLOUD SERVICE PERFORMANCE REPORT")
             report.append("=" * 80)
             
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = DateProvider.get_instance().now().strftime("%Y-%m-%d %H:%M:%S")
             report.append(f"Generated: {timestamp}")
             
             if provider:

@@ -1,14 +1,87 @@
 {
     "default_client": "gpt4o_financial",
-    "clients": {
+    "providers": {
         "gpt4o_financial": {
             "provider": "openai",
-            "model_name": "gpt-4o",
-            "compliance_level": "financial",
-            "capabilities": ["text_generation", "embeddings", "classification"],
-            "additional_params": {
-                "user": "financial-services",
-                "safe_mode": true
+            "model": "gpt-4o",
+            "api_key": "${OPENAI_API_KEY}",
+            "organization_id": "${OPENAI_ORG_ID}",
+            "temperature": 0.3,
+            "max_tokens": 2000,
+            "top_p": 0.9,
+            "system_message": "You are a helpful, ethical, and responsible financial advisor assistant. You help users with general financial questions while being careful not to provide specific investment advice that could be construed as regulated financial advice.",
+            "use_cases": ["financial_advice", "customer_response", "general"],
+            "retry_config": {
+                "max_retries": 3,
+                "initial_delay": 1,
+                "exponential_backoff": true
+            },
+            "guardrails": {
+                "enabled": true,
+                "input_checks": ["prompt_injection", "jailbreak_detection", "harmful_content"],
+                "output_checks": ["pii_detection", "hallucination_prevention", "token_limit"],
+                "block_policy": "return_error"
+            },
+            "human_review": {
+                "enabled": true,
+                "review_threshold": 0.85,
+                "review_categories": ["financial_advice"],
+                "allow_proceeding_pending_review": false
+            }
+        },
+        "claude_compliance": {
+            "provider": "anthropic",
+            "model": "claude-3-5-sonnet-20240620",
+            "api_key": "${ANTHROPIC_API_KEY}",
+            "temperature": 0.2,
+            "max_tokens": 4000,
+            "top_p": 0.9,
+            "system_message": "You are a helpful, accurate, and responsible compliance assistant with expertise in financial regulations. You help ensure that content complies with relevant financial regulations while providing helpful guidance. When uncertain, you note your uncertainty rather than providing potentially incorrect information.",
+            "use_cases": ["compliance_check", "document_analysis"],
+            "retry_config": {
+                "max_retries": 3,
+                "initial_delay": 1,
+                "exponential_backoff": true
+            },
+            "guardrails": {
+                "enabled": true,
+                "input_checks": ["prompt_injection", "jailbreak_detection", "harmful_content", "pii_detection"],
+                "output_checks": ["hallucination_prevention", "token_limit"],
+                "block_policy": "return_error"
+            },
+            "human_review": {
+                "enabled": true,
+                "review_threshold": 0.90,
+                "review_categories": ["compliance_check"],
+                "allow_proceeding_pending_review": false
+            }
+        },
+        "gemini_multimodal": {
+            "provider": "google",
+            "model": "gemini-1.5-pro",
+            "api_key": "${GOOGLE_API_KEY}",
+            "project_id": "${GOOGLE_PROJECT_ID}",
+            "temperature": 0.4,
+            "max_tokens": 2048,
+            "top_p": 0.95,
+            "system_message": "You are a helpful, accurate assistant that can analyze both text and visual content. You provide clear and accurate information about what you see in images and respond to queries with helpful information.",
+            "use_cases": ["document_analysis", "customer_response", "general", "sentiment_analysis"],
+            "retry_config": {
+                "max_retries": 3,
+                "initial_delay": 1,
+                "exponential_backoff": true
+            },
+            "guardrails": {
+                "enabled": true,
+                "input_checks": ["prompt_injection", "jailbreak_detection", "harmful_content"],
+                "output_checks": ["pii_detection", "hallucination_prevention", "token_limit"],
+                "block_policy": "return_error"
+            },
+            "human_review": {
+                "enabled": true,
+                "review_threshold": 0.80,
+                "review_categories": ["document_analysis"],
+                "allow_proceeding_pending_review": true
             }
         },
         "claude_sonnet": {
@@ -47,6 +120,102 @@
             "provider": "openai",
             "model_name": "text-embedding-3-large",
             "capabilities": ["embeddings"]
+        }
+    },
+    "fallbacks": {
+        "gpt4o_financial": ["claude_compliance", "gemini_multimodal"],
+        "claude_compliance": ["gpt4o_financial"],
+        "gemini_multimodal": ["gpt4o_financial"]
+    },
+    "routing": {
+        "enabled": true,
+        "rules": [
+            {
+                "use_case": "financial_advice",
+                "preferred_provider": "gpt4o_financial",
+                "fallback_provider": "claude_compliance"
+            },
+            {
+                "use_case": "compliance_check",
+                "preferred_provider": "claude_compliance",
+                "fallback_provider": "gpt4o_financial"
+            },
+            {
+                "use_case": "document_analysis",
+                "preferred_provider": "gemini_multimodal",
+                "fallback_provider": "claude_compliance"
+            },
+            {
+                "use_case": "sentiment_analysis",
+                "preferred_provider": "gemini_multimodal",
+                "fallback_provider": "gpt4o_financial"
+            }
+        ],
+        "default_provider": "gpt4o_financial"
+    },
+    "caching": {
+        "enabled": true,
+        "ttl_seconds": 3600,
+        "max_cache_size": 1000,
+        "exclude_from_cache": ["compliance_check"]
+    },
+    "observability": {
+        "logging": {
+            "log_level": "info",
+            "log_requests": true,
+            "log_responses": true,
+            "mask_sensitive_data": true
+        },
+        "metrics": {
+            "enabled": true,
+            "include_latency": true,
+            "include_token_usage": true,
+            "include_request_counts": true
+        },
+        "tracing": {
+            "enabled": true,
+            "sample_rate": 0.1
+        }
+    },
+    "cost_management": {
+        "enabled": true,
+        "budget_limits": {
+            "daily": 100.0,
+            "monthly": 2000.0
+        },
+        "alert_thresholds": {
+            "daily": 0.8,
+            "monthly": 0.8
+        },
+        "cost_per_token": {
+            "gpt4o_financial": {
+                "input": 0.000010,
+                "output": 0.000030
+            },
+            "claude_compliance": {
+                "input": 0.000015,
+                "output": 0.000075
+            },
+            "gemini_multimodal": {
+                "input": 0.000008,
+                "output": 0.000024
+            }
+        }
+    },
+    "security": {
+        "api_key_rotation": {
+            "enabled": true,
+            "rotation_period_days": 90
+        },
+        "request_validation": {
+            "enabled": true,
+            "validate_ip": true,
+            "validate_auth": true
+        },
+        "content_filtering": {
+            "enabled": true,
+            "use_provider_filters": true,
+            "use_custom_filters": true
         }
     },
     "usage_examples": {

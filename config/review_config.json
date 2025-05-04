@@ -1,0 +1,224 @@
+{
+  "name": "CustomerAI Human Review Configuration",
+  "version": "1.0.0",
+  "description": "Configuration for human-in-the-loop review following industry standards from Anthropic, Scale AI, and Appen",
+  "review_thresholds": {
+    "financial_advice": {
+      "confidence_threshold": 0.85,
+      "minimum_risk_level": "medium",
+      "description": "Financial advice requires higher scrutiny due to potential monetary impact"
+    },
+    "customer_response": {
+      "confidence_threshold": 0.75,
+      "minimum_risk_level": "low",
+      "description": "General customer responses with brand reputation considerations"
+    },
+    "document_analysis": {
+      "confidence_threshold": 0.80,
+      "minimum_risk_level": "medium",
+      "description": "Analysis of legal or financial documents"
+    },
+    "compliance_check": {
+      "confidence_threshold": 0.90,
+      "minimum_risk_level": "medium",
+      "description": "Regulatory compliance determinations require high accuracy"
+    },
+    "sentiment_analysis": {
+      "confidence_threshold": 0.70,
+      "minimum_risk_level": "low",
+      "description": "General sentiment analysis for customer feedback"
+    },
+    "general": {
+      "confidence_threshold": 0.70,
+      "minimum_risk_level": "low",
+      "description": "Default category for uncategorized content"
+    }
+  },
+  "sla_targets": {
+    "critical": 60,
+    "high": 240,
+    "medium": 1440,
+    "low": 4320
+  },
+  "notification_channels": {
+    "slack": {
+      "enabled": true,
+      "channels": {
+        "default": "customer-ai-reviews",
+        "financial": "financial-reviews",
+        "compliance": "compliance-reviews",
+        "escalation": "review-escalations"
+      },
+      "notify_on_priority": ["critical", "high"],
+      "daily_digest": true
+    },
+    "email": {
+      "enabled": true,
+      "templates": {
+        "assignment": "email_templates/assignment.html",
+        "escalation": "email_templates/escalation.html",
+        "digest": "email_templates/digest.html"
+      },
+      "notify_on_priority": ["critical"],
+      "daily_digest": true
+    }
+  },
+  "queues": [
+    {
+      "name": "default",
+      "categories": ["general", "sentiment_analysis", "customer_response"],
+      "max_size": 1000,
+      "description": "General purpose review queue"
+    },
+    {
+      "name": "financial",
+      "categories": ["financial_advice"],
+      "max_size": 500,
+      "description": "Financial advice review queue"
+    },
+    {
+      "name": "compliance",
+      "categories": ["compliance_check", "document_analysis"],
+      "max_size": 500,
+      "description": "Compliance and document review queue"
+    },
+    {
+      "name": "escalation",
+      "categories": ["general", "financial_advice", "compliance_check", "document_analysis", "sentiment_analysis", "customer_response"],
+      "max_size": 100,
+      "description": "Queue for escalated reviews requiring special attention"
+    }
+  ],
+  "reviewer_roles": {
+    "general": {
+      "permissions": ["review:general", "review:sentiment_analysis", "review:customer_response"],
+      "max_daily_reviews": 50,
+      "description": "General purpose reviewer"
+    },
+    "financial": {
+      "permissions": ["review:financial_advice", "review:general"],
+      "max_daily_reviews": 40,
+      "description": "Financial domain expert"
+    },
+    "compliance": {
+      "permissions": ["review:compliance_check", "review:document_analysis"],
+      "max_daily_reviews": 30,
+      "description": "Compliance and regulatory expert"
+    },
+    "subject_matter_expert": {
+      "permissions": ["review:general", "review:specialized"],
+      "max_daily_reviews": 25,
+      "description": "Subject matter expert for specialized domains"
+    },
+    "administrator": {
+      "permissions": ["review:all", "admin:manage_reviewers", "admin:configure_system"],
+      "max_daily_reviews": 100,
+      "description": "System administrator with all permissions"
+    }
+  },
+  "feedback_collection": {
+    "structured_feedback": {
+      "enabled": true,
+      "categories": [
+        "factual_accuracy",
+        "helpfulness",
+        "safety",
+        "coherence",
+        "relevance",
+        "tone_appropriateness"
+      ],
+      "rating_scale": {
+        "min": 1,
+        "max": 5,
+        "description": "1 (Poor) to 5 (Excellent)"
+      }
+    },
+    "issue_categories": [
+      {
+        "id": "hallucination",
+        "name": "Factual Error/Hallucination",
+        "description": "Response contains factually incorrect information"
+      },
+      {
+        "id": "harmful",
+        "name": "Harmful Content",
+        "description": "Response contains potentially harmful content"
+      },
+      {
+        "id": "incomplete",
+        "name": "Incomplete Answer",
+        "description": "Response does not fully address the query"
+      },
+      {
+        "id": "off_topic",
+        "name": "Off-Topic",
+        "description": "Response is not relevant to the query"
+      },
+      {
+        "id": "unclear",
+        "name": "Unclear Response",
+        "description": "Response is confusing or difficult to understand"
+      },
+      {
+        "id": "tone",
+        "name": "Inappropriate Tone",
+        "description": "Tone does not match the context or brand voice"
+      },
+      {
+        "id": "too_technical",
+        "name": "Too Technical",
+        "description": "Response is too technical for the intended audience"
+      },
+      {
+        "id": "too_simple",
+        "name": "Too Simple",
+        "description": "Response is too simplistic for the intended audience"
+      }
+    ],
+    "free_form_comments": {
+      "enabled": true,
+      "min_length": 0,
+      "max_length": 1000
+    },
+    "human_edited_responses": {
+      "enabled": true,
+      "store_original": true,
+      "require_edit_reason": true
+    },
+    "data_storage": {
+      "primary_database": "postgresql",
+      "daily_exports": {
+        "enabled": true,
+        "format": "jsonl",
+        "path": "data/human_feedback"
+      }
+    }
+  },
+  "metrics_and_reporting": {
+    "dashboard_metrics": [
+      "total_pending_reviews",
+      "reviews_by_status",
+      "reviews_by_category",
+      "reviews_by_priority",
+      "average_time_to_review",
+      "sla_compliance_rate",
+      "reviewer_workload",
+      "approval_rate_by_model"
+    ],
+    "daily_report": {
+      "enabled": true,
+      "recipients": ["ai-team@example.com"],
+      "include_metrics": true,
+      "include_reviewer_stats": true
+    },
+    "export_formats": ["csv", "json"],
+    "retention_period_days": 90
+  },
+  "system_configuration": {
+    "database_url": "${DATABASE_URI}",
+    "max_pending_reviews": 1000,
+    "review_dashboard_url": "${REVIEW_DASHBOARD_URL}",
+    "daily_reset_time": "00:00",
+    "timezone": "UTC"
+  }
+} 

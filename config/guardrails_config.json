@@ -1,0 +1,309 @@
+{
+  "name": "CustomerAI Guardrails Configuration",
+  "version": "1.0.0",
+  "description": "Configuration for LLM guardrails following industry standards from Microsoft, OpenAI, and Anthropic",
+  "checks": [
+    {
+      "name": "prompt_injection",
+      "enabled": true,
+      "category": "security",
+      "description": "Detect prompt injection attempts",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "(?i)\\b(?:ignore previous instructions|ignore above instructions|disregard|new instructions|system prompt|you are now|as an AI language model|act as if|do not follow|bypass|hack|evade)\\b",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "flag",
+        "medium": "flag",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.6,
+      "include_explanation": true
+    },
+    {
+      "name": "jailbreak_detection",
+      "enabled": true,
+      "category": "security",
+      "description": "Detect attempts to bypass model restrictions",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "(?i)\\b(?:DAN mode|jailbreak|illegal request|unethical task|immoral behavior|dev mode|super ai|ignore ethics|ignore restrictions|ignore content policy|ignore programming|ignoring all|without any restrictions|constraints do not apply)\\b",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "flag",
+        "medium": "block",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    },
+    {
+      "name": "credit_card_detection",
+      "enabled": true,
+      "category": "privacy",
+      "description": "Detect and redact credit card numbers",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "(?:\\d{4}[- ]?){3}\\d{4}",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "redact",
+        "medium": "redact",
+        "high": "redact",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    },
+    {
+      "name": "social_security_detection",
+      "enabled": true,
+      "category": "privacy",
+      "description": "Detect and redact SSNs",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "\\b\\d{3}[-]?\\d{2}[-]?\\d{4}\\b",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "redact",
+        "medium": "redact",
+        "high": "redact",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    },
+    {
+      "name": "email_detection",
+      "enabled": true,
+      "category": "privacy",
+      "description": "Detect and redact email addresses",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "redact",
+        "medium": "redact",
+        "high": "redact",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    },
+    {
+      "name": "phone_detection",
+      "enabled": true,
+      "category": "privacy",
+      "description": "Detect and redact phone numbers",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "\\(?\\d{3}\\)?[-.]?\\d{3}[-.]?\\d{4}",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "redact",
+        "medium": "redact",
+        "high": "redact",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    },
+    {
+      "name": "api_key_detection",
+      "enabled": true,
+      "category": "security",
+      "description": "Detect and redact API keys and credentials",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "\\b(?:[A-Za-z0-9_-]{32,}|sk-[A-Za-z0-9]{48}|ghp_[A-Za-z0-9]{36})\\b",
+        "case_sensitive": true
+      },
+      "actions": {
+        "low": "redact",
+        "medium": "redact",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    },
+    {
+      "name": "sql_injection",
+      "enabled": true,
+      "category": "security",
+      "description": "Detect SQL injection attempts",
+      "rule_type": "regex",
+      "rule_config": {
+        "pattern": "\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|UNION|JOIN|WHERE)\\b.*\\b(?:FROM|INTO|TABLE)\\b",
+        "case_sensitive": false
+      },
+      "actions": {
+        "low": "flag",
+        "medium": "flag",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.6,
+      "include_explanation": true
+    },
+    {
+      "name": "harmful_content",
+      "enabled": true,
+      "category": "safety",
+      "description": "Detect potentially harmful content",
+      "rule_type": "semantic",
+      "rule_config": {
+        "categories": [
+          "hate",
+          "self_harm",
+          "sexual",
+          "violence",
+          "harassment"
+        ],
+        "threshold": 0.7
+      },
+      "actions": {
+        "low": "flag",
+        "medium": "flag",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.7,
+      "include_explanation": true
+    },
+    {
+      "name": "discrimination",
+      "enabled": true,
+      "category": "ethics",
+      "description": "Detect potentially discriminatory content",
+      "rule_type": "semantic",
+      "rule_config": {
+        "categories": [
+          "discrimination"
+        ],
+        "threshold": 0.6
+      },
+      "actions": {
+        "low": "flag",
+        "medium": "flag",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.6,
+      "include_explanation": true
+    },
+    {
+      "name": "illegal_activity",
+      "enabled": true,
+      "category": "compliance",
+      "description": "Detect content promoting illegal activities",
+      "rule_type": "semantic",
+      "rule_config": {
+        "categories": [
+          "illegal_activity"
+        ],
+        "threshold": 0.6
+      },
+      "actions": {
+        "low": "flag",
+        "medium": "flag",
+        "high": "block",
+        "critical": "block"
+      },
+      "severity_threshold": 0.6,
+      "include_explanation": true
+    },
+    {
+      "name": "hallucination_prevention",
+      "enabled": true,
+      "category": "quality",
+      "description": "Prevent model hallucinations",
+      "rule_type": "custom",
+      "rule_config": {
+        "check_function": "detect_uncertainty",
+        "threshold": 0.7,
+        "uncertainty_phrases": [
+          "I'm not sure",
+          "I don't know",
+          "I'm uncertain",
+          "It's unclear",
+          "I'm not confident",
+          "There's no way to determine",
+          "It's not possible to",
+          "Without more information",
+          "Cannot provide"
+        ]
+      },
+      "actions": {
+        "low": "allow",
+        "medium": "flag",
+        "high": "modify",
+        "critical": "block"
+      },
+      "severity_threshold": 0.7,
+      "include_explanation": true
+    },
+    {
+      "name": "token_limit",
+      "enabled": true,
+      "category": "quality",
+      "description": "Enforce token limits for different models",
+      "rule_type": "custom",
+      "rule_config": {
+        "check_function": "check_token_limit",
+        "model_limits": {
+          "gpt-4": 8192,
+          "gpt-3.5-turbo": 4096,
+          "claude-2": 100000
+        }
+      },
+      "actions": {
+        "low": "allow",
+        "medium": "modify",
+        "high": "modify",
+        "critical": "block"
+      },
+      "severity_threshold": 0.5,
+      "include_explanation": true
+    }
+  ],
+  "compliance": {
+    "logging": {
+      "enabled": true,
+      "log_level": "info",
+      "log_violations": true,
+      "log_full_content": false
+    },
+    "reporting": {
+      "enabled": true,
+      "periodic_reports": true,
+      "report_frequency": "daily"
+    },
+    "audit": {
+      "enabled": true,
+      "audit_frequency": "weekly",
+      "retention_period": 90
+    }
+  },
+  "integration": {
+    "slack": {
+      "enabled": true,
+      "channel": "guardrails-alerts",
+      "min_severity": "high"
+    },
+    "email": {
+      "enabled": true,
+      "recipients": ["security@example.com"],
+      "min_severity": "critical"
+    }
+  }
+} 

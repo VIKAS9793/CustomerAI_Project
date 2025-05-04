@@ -529,13 +529,13 @@ Creates a distributed training job for model fine-tuning.
   "error": false,
   "status_code": 200,
   "data": {
-    "job_id": "train-2025-05-10-12345",
+    "job_id": "train-2025-05-04-12345",
     "status": "STARTING",
     "estimated_time": "25 minutes",
-    "model_output_uri": "s3://customerai-models/financial-sentiment-2025-05-10/",
-    "logs_uri": "s3://customerai-logs/training/train-2025-05-10-12345/"
+    "model_output_uri": "s3://customerai-models/financial-sentiment-2025-05-04/",
+    "logs_uri": "s3://customerai-logs/training/train-2025-05-04-12345/"
   },
-  "timestamp": "2025-05-10T15:20:45.123456"
+  "timestamp": "2025-05-04T15:20:45.123456"
 }
 ```
 
@@ -549,7 +549,7 @@ Gets the status of a training job.
   "error": false,
   "status_code": 200,
   "data": {
-    "job_id": "train-2025-05-10-12345",
+    "job_id": "train-2025-05-04-12345",
     "status": "IN_PROGRESS",
     "progress": {
       "current_epoch": 2,
@@ -561,9 +561,9 @@ Gets the status of a training job.
         "validation_accuracy": 0.9234
       }
     },
-    "estimated_completion": "2025-05-10T15:45:23Z"
+    "estimated_completion": "2025-05-04T15:45:23Z"
   },
-  "timestamp": "2025-05-10T15:30:45.123456"
+  "timestamp": "2025-05-04T15:30:45.123456"
 }
 ```
 
@@ -574,7 +574,7 @@ Deploys a trained model to the inference endpoint.
 **Request Body**:
 ```json
 {
-  "model_uri": "s3://customerai-models/financial-sentiment-2025-05-10/",
+  "model_uri": "s3://customerai-models/financial-sentiment-2025-05-04/",
   "deployment_name": "financial-sentiment-prod",
   "deployment_strategy": "kubernetes",
   "replicas": 3,
@@ -597,12 +597,12 @@ Deploys a trained model to the inference endpoint.
   "error": false,
   "status_code": 200,
   "data": {
-    "deployment_id": "deploy-2025-05-10-67890",
+    "deployment_id": "deploy-2025-05-04-67890",
     "status": "CREATING",
     "endpoint": "https://api.customerai.com/v1/predict/financial-sentiment-prod",
-    "metrics_endpoint": "https://metrics.customerai.com/deployments/deploy-2025-05-10-67890"
+    "metrics_endpoint": "https://metrics.customerai.com/deployments/deploy-2025-05-04-67890"
   },
-  "timestamp": "2025-05-10T16:01:12.123456"
+  "timestamp": "2025-05-04T16:01:12.123456"
 }
 ```
 
@@ -642,7 +642,7 @@ Gets model explanation for predictions.
       "visualization_url": "https://api.customerai.com/visualizations/exp-12345"
     }
   },
-  "timestamp": "2025-05-10T16:10:27.123456"
+  "timestamp": "2025-05-04T16:10:27.123456"
 }
 ```
 

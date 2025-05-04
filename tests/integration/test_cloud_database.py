@@ -18,6 +18,7 @@ import json
 import logging
 import pytest
 from datetime import datetime, timedelta
+from src.utils.date_provider import DateProvider
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -137,7 +138,7 @@ def test_create_and_get_item(db_client, test_table):
     """Test creating and retrieving an item."""
     # Create a test item
     item_id = str(uuid.uuid4())
-    created_at = datetime.now().isoformat()
+    created_at = DateProvider.get_instance().iso_format()
     
     item = {
         "id": item_id,
@@ -168,7 +169,7 @@ def test_update_item(db_client, test_table):
     """Test updating an item."""
     # Create a test item
     item_id = str(uuid.uuid4())
-    created_at = datetime.now().isoformat()
+    created_at = DateProvider.get_instance().iso_format()
     
     item = {
         "id": item_id,
@@ -203,7 +204,7 @@ def test_delete_item(db_client, test_table):
     """Test deleting an item."""
     # Create a test item
     item_id = str(uuid.uuid4())
-    created_at = datetime.now().isoformat()
+    created_at = DateProvider.get_instance().iso_format()
     
     item = {
         "id": item_id,
@@ -232,7 +233,7 @@ def test_batch_write(db_client, test_table):
     for i in range(5):
         items.append({
             "id": f"batch-{uuid.uuid4()}",
-            "created_at": datetime.now().isoformat(),
+            "created_at": DateProvider.get_instance().iso_format(),
             "index": i,
             "name": f"Batch Item {i}"
         })
@@ -260,7 +261,7 @@ def test_query_items(db_client, test_table):
         status = "active" if i % 2 == 0 else "inactive"
         items.append({
             "id": f"{query_id_prefix}-{i}",
-            "created_at": datetime.now().isoformat(),
+            "created_at": DateProvider.get_instance().iso_format(),
             "index": i,
             "status": status
         })
@@ -287,7 +288,7 @@ def test_conditional_operations(db_client, test_table):
     """Test conditional operations."""
     # Create an item
     item_id = str(uuid.uuid4())
-    created_at = datetime.now().isoformat()
+    created_at = DateProvider.get_instance().iso_format()
     
     item = {
         "id": item_id,
@@ -344,7 +345,7 @@ def test_pagination(db_client, test_table):
     for i in range(25):
         items.append({
             "id": f"{prefix}-{i:03d}",
-            "created_at": datetime.now().isoformat(),
+            "created_at": DateProvider.get_instance().iso_format(),
             "value": i
         })
     
@@ -371,7 +372,7 @@ def test_pagination(db_client, test_table):
 def test_complex_data_types(db_client, test_table):
     """Test handling of complex data types."""
     item_id = str(uuid.uuid4())
-    created_at = datetime.now().isoformat()
+    created_at = DateProvider.get_instance().iso_format()
     
     # Create item with nested structures
     item = {
@@ -433,7 +434,7 @@ def test_complex_data_types(db_client, test_table):
 def test_error_handling(db_client, test_table):
     """Test error handling in database operations."""
     # Attempt to get non-existent item
-    nonexistent_key = {"id": f"nonexistent-{uuid.uuid4()}", "created_at": datetime.now().isoformat()}
+    nonexistent_key = {"id": f"nonexistent-{uuid.uuid4()}", "created_at": DateProvider.get_instance().iso_format()}
     non_existent_item = db_client.get_item(test_table, nonexistent_key)
     
     # Should return empty dict, not error

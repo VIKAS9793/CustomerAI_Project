@@ -11,6 +11,7 @@ import uuid
 import time
 from datetime import datetime
 from dotenv import load_dotenv
+from src.utils.date_provider import DateProvider
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -64,7 +65,7 @@ def create_items(db_client, table_name="customerai_example", count=5):
     items = []
     for i in range(count):
         item_id = str(uuid.uuid4())
-        created_at = datetime.now().isoformat()
+        created_at = DateProvider.get_instance().iso_format()
         
         item = {
             "id": item_id,
@@ -240,7 +241,7 @@ def run_example(provider=None):
         if item:
             updates = {
                 "name": f"{item['name']} (Updated)",
-                "last_updated": datetime.now().isoformat(),
+                "last_updated": DateProvider.get_instance().iso_format(),
                 "counter": 42
             }
             update_item(db_client, item["id"], item["created_at"], updates, table_name)

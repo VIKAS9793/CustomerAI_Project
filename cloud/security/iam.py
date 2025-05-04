@@ -22,6 +22,7 @@ from typing import Dict, Any, Optional, List, Union, Callable, TypeVar
 from enum import Enum
 from datetime import datetime, timedelta
 import functools
+from src.utils.date_provider import DateProvider
 
 from cloud.config import CloudProvider
 from cloud.errors import CloudAuthenticationError, CloudAuthorizationError
@@ -160,7 +161,7 @@ class Credential:
         self.value = value
         self.expiry = expiry
         self.metadata = metadata or {}
-        self.created_at = datetime.now()
+        self.created_at = DateProvider.get_instance().now()
     
     def is_expired(self) -> bool:
         """
@@ -172,7 +173,7 @@ class Credential:
         if self.expiry is None:
             return False
         
-        return datetime.now() > self.expiry
+        return DateProvider.get_instance().now() > self.expiry
     
     def time_to_expiry(self) -> Optional[timedelta]:
         """
@@ -184,7 +185,7 @@ class Credential:
         if self.expiry is None:
             return None
         
-        return self.expiry - datetime.now()
+        return self.expiry - DateProvider.get_instance().now()
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert credential to dictionary representation."""
@@ -294,7 +295,7 @@ class IAMManager:
     def _refresh_expiring_credentials(self):
         """Refresh credentials that are about to expire."""
         with self.lock:
-            now = datetime.now()
+            now = DateProvider.get_instance().now()
             
             for provider, creds in self.credentials.items():
                 for name, credential in list(creds.items()):
@@ -701,14 +702,14 @@ class IAMManager:
         
         # Set expiry if not provided
         if expiry is None:
-            expiry = datetime.now() + self.token_expiry
+            expiry = DateProvider.get_instance().now() + self.token_expiry
         
         # Create token data
         token_data = {
             "id": token_id,
             "user_id": user_id,
             "roles": roles,
-            "created_at": datetime.now().isoformat(),
+            "created_at": DateProvider.get_instance().iso_format(),
             "expiry": expiry.isoformat(),
             "metadata": metadata or {}
         }
@@ -737,7 +738,7 @@ class IAMManager:
             
             # Check if token is expired
             expiry = datetime.fromisoformat(token_data["expiry"])
-            if datetime.now() > expiry:
+            if DateProvider.get_instance().now() > expiry:
                 # Remove expired token
                 del self.tokens[token_id]
                 return None
