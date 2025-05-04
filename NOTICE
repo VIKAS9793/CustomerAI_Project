@@ -1,0 +1,27 @@
+CustomerAI Insights Platform - Cloud Infrastructure
+Copyright (c) 2025 Vikas Sahani
+
+This project includes software developed by Vikas Sahani.
+GitHub: https://github.com/VIKAS9793
+Email: vikassahani17@gmail.com
+
+================================================================================
+
+This product includes original software developed for production-grade cloud infrastructure
+with standardized error handling, resilient retry mechanisms, performance metrics,
+and connection pooling optimizations.
+
+The implementation is inspired by industry best practices for cloud service
+integration and resilience patterns.
+
+================================================================================
+
+IMPORTANT: The copyright and license only apply to the original code created by the authors 
+of this project, not to any third-party libraries, dependencies, or cloud provider SDKs.
+Please see DEPENDENCIES.md for a list of third-party components and their respective licenses.
+
+================================================================================
+
+This notice file is required by the MIT License, under which this project 
+is licensed. It acknowledges the copyright holders and contributors to 
+the project. 

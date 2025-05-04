@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}CustomerAI Insights Platform{% endblock %}</title>
+    <meta name="description" content="Financial services AI platform for customer insights and personalized recommendations">
+    
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta name="referrer" content="no-referrer">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    {% block styles %}{% endblock %}
+    
+    <!-- Device security script - must load early -->
+    <script src="/static/js/device_security.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/"><img src="/static/images/logo.svg" alt="CustomerAI Logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/insights">Insights</a></li>
+                <li><a href="/analytics">Analytics</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/api/docs" target="_blank">API</a></li>
+            </ul>
+            <div class="user-menu">
+                {% if current_user %}
+                <span>{{ current_user.name }}</span>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+                {% else %}
+                <a href="/auth/login" class="btn btn-primary">Login</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>CustomerAI Insights Platform</h3>
+                <p>Advanced AI-powered insights for financial services</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: support@customerai.example.com</p>
+                <p>Phone: (555) 123-4567</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {% now 'Y' %} CustomerAI. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- Main JavaScript -->
+    <script src="/static/js/main.js"></script>
+    
+    <!-- Apply security measures to all API requests -->
+    <script>
+        // Setup security for API requests
+        document.addEventListener('DOMContentLoaded', () => {
+            // Override fetch to use secure requests
+            const originalFetch = window.fetch;
+            window.fetch = async function(url, options) {
+                // Only apply to our API endpoints
+                if (url.toString().includes('/api/')) {
+                    return CustomerAI.Security.secureApiRequest(url, options);
+                }
+                return originalFetch.apply(this, arguments);
+            };
+            
+            console.log('Security measures applied to API requests');
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

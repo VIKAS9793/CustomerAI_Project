@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    image: customerai-api
+    container_name: customerai-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    command: ["./docker-entrypoint.sh", "api"]
+
+  dashboard:
+    build: .
+    image: customerai-dashboard
+    container_name: customerai-dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - api
+    command: ["./docker-entrypoint.sh", "dashboard"]
+
+  postgres:
+    image: postgres:14
+    container_name: customerai-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-customerai}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: customerai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: customerai-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+
+  nginx:
+    image: nginx:alpine
+    container_name: customerai-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+      - dashboard
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data: 

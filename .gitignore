@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.env
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Database
+*.db
+*.sqlite3
+*.sqlite
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Application specific
+data/*
+!data/.gitkeep
+exports/*
+!exports/.gitkeep
+.env
+.env.*
+!.env.example
+.openai_key
+
+# Docker
+.dockerignore
+
+# Jupyter notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# Documentation build
+docs/_build/
+docs/api/
+docs/_static/
+docs/_templates/
+
+# Distribution / packaging
+*.manifest
+*.spec
+*.pot
+
+# Unit test / coverage reports
+.pytest_cache/
+
+# mypy
+.mypy_cache/ 
