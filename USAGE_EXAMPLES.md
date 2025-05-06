@@ -155,7 +155,7 @@ conversations = pd.DataFrame({
 # Convert to the format expected by the API
 request_data = {
     "conversations": [
-        {"id": row.id, "text": row.text} 
+        {"id": row.id, "text": row.text}
         for _, row in conversations.iterrows()
     ]
 }
@@ -280,13 +280,13 @@ import pandas as pd
 def anonymize_dataset(df, text_column):
     # API endpoint
     url = "http://localhost:8000/api/v1/privacy/anonymize"
-    
+
     # Request headers
     headers = {
         "Authorization": "Bearer YOUR_JWT_TOKEN",
         "Content-Type": "application/json"
     }
-    
+
     # Process each row
     anonymized_texts = []
     for text in df[text_column]:
@@ -294,11 +294,11 @@ def anonymize_dataset(df, text_column):
         response = requests.post(url, headers=headers, json=data)
         result = response.json()
         anonymized_texts.append(result['data']['anonymized_text'])
-    
+
     # Create new dataframe with anonymized text
     df_anonymized = df.copy()
     df_anonymized[text_column + '_anonymized'] = anonymized_texts
-    
+
     return df_anonymized
 
 # Example usage
@@ -340,7 +340,7 @@ for _ in range(n_samples):
     age_group = np.random.choice(age_groups)
     gender = np.random.choice(genders)
     income = np.random.choice(income_levels)
-    
+
     # Introduce a bias based on age_group for this example
     if age_group == '60+':
         satisfaction = max(1, np.random.normal(2.5, 0.5))  # Lower satisfaction for older age group
@@ -348,7 +348,7 @@ for _ in range(n_samples):
     else:
         satisfaction = min(5, np.random.normal(4.2, 0.7))  # Higher satisfaction for others
         resolved = np.random.choice([True, False], p=[0.9, 0.1])  # Higher resolution rate
-    
+
     data.append({
         'age_group': age_group,
         'gender': gender,
@@ -559,27 +559,27 @@ import time
 
 class CustomerAIIntegration:
     """Integration class for CustomerAI with support ticket systems"""
-    
+
     def __init__(self, api_base_url, api_token):
         self.api_base_url = api_base_url
         self.headers = {
             "Authorization": f"Bearer {api_token}",
             "Content-Type": "application/json"
         }
-    
+
     def process_ticket(self, ticket_id, customer_message, customer_id=None):
         """Process a support ticket through CustomerAI"""
-        
+
         # Step 1: Analyze sentiment
         sentiment_data = self._analyze_sentiment(customer_message)
-        
+
         # Step 2: Generate response
         response_data = self._generate_response(
-            customer_message, 
+            customer_message,
             customer_id=customer_id,
             sentiment=sentiment_data
         )
-        
+
         # Step 3: If high-risk, queue for human review
         if response_data.get('requires_human_review', False):
             review_data = self._queue_for_review(
@@ -588,7 +588,7 @@ class CustomerAIIntegration:
                 category=response_data['category'],
                 metadata={"ticket_id": ticket_id, "customer_id": customer_id}
             )
-            
+
             return {
                 "ticket_id": ticket_id,
                 "status": "pending_review",
@@ -596,7 +596,7 @@ class CustomerAIIntegration:
                 "suggested_response": response_data['response'],
                 "review_id": review_data['item_id']
             }
-        
+
         # Step 4: Return processed result
         return {
             "ticket_id": ticket_id,
@@ -605,14 +605,14 @@ class CustomerAIIntegration:
             "response": response_data['response'],
             "confidence": response_data.get('confidence', 0)
         }
-    
+
     def _analyze_sentiment(self, text):
         """Analyze sentiment of text"""
         url = f"{self.api_base_url}/analyze/sentiment"
         data = {"text": text, "use_ai": True}
         response = requests.post(url, headers=self.headers, json=data)
         return response.json()['data']
-    
+
     def _generate_response(self, query, customer_id=None, sentiment=None):
         """Generate response to customer query"""
         url = f"{self.api_base_url}/generate/response"
@@ -621,15 +621,15 @@ class CustomerAIIntegration:
             "customer_id": customer_id,
             "context": {}
         }
-        
+
         # Add sentiment context if available
         if sentiment:
             data["context"]["sentiment"] = sentiment['sentiment']
             data["context"]["satisfaction_score"] = sentiment.get('analysis', {}).get('satisfaction_score')
-        
+
         response = requests.post(url, headers=self.headers, json=data)
         return response.json()['data']
-    
+
     def _queue_for_review(self, query, response, category=None, metadata=None):
         """Queue an item for human review"""
         url = f"{self.api_base_url}/review/queue"
@@ -640,10 +640,10 @@ class CustomerAIIntegration:
             "priority": 2,  # Default to high priority
             "metadata": metadata or {}
         }
-        
+
         response = requests.post(url, headers=self.headers, json=data)
         return response.json()['data']
-    
+
     def check_review_status(self, review_id):
         """Check status of a review"""
         url = f"{self.api_base_url}/review/status/{review_id}"
@@ -657,25 +657,25 @@ if __name__ == "__main__":
         api_base_url="http://localhost:8000/api/v1",
         api_token="YOUR_JWT_TOKEN"
     )
-    
+
     # Process a support ticket
     result = integration.process_ticket(
         ticket_id="T12345",
         customer_message="I've been charged twice for my monthly premium and need this resolved immediately.",
         customer_id="C98765"
     )
-    
+
     print(json.dumps(result, indent=2))
-    
+
     # If sent for review, check status (in real system, this would be a separate process)
     if result['status'] == 'pending_review':
         print("Waiting for human review...")
-        
+
         # Poll for review completion (simplified example)
         for _ in range(5):  # Try 5 times
             time.sleep(2)  # Wait 2 seconds between checks
             status = integration.check_review_status(result['review_id'])
-            
+
             if status['status'] == 'reviewed':
                 print("Review completed!")
                 print(f"Approved: {status['approved']}")
@@ -713,16 +713,16 @@ def process_conversation(row):
         "text": row['customer_message'],
         "use_ai": True
     }
-    
+
     try:
         sentiment_response = requests.post(
-            sentiment_url, 
-            headers=HEADERS, 
+            sentiment_url,
+            headers=HEADERS,
             json=sentiment_data,
             timeout=10
         )
         sentiment_result = sentiment_response.json()['data']
-        
+
         # Return combined results
         return {
             'conversation_id': row['conversation_id'],
@@ -746,7 +746,7 @@ results = []
 print(f"Processing {len(conversations)} historical conversations...")
 with ThreadPoolExecutor(max_workers=5) as executor:
     futures = [executor.submit(process_conversation, row) for _, row in conversations.iterrows()]
-    
+
     for future in tqdm(futures, total=len(futures)):
         results.append(future.result())
 
@@ -785,7 +785,7 @@ async def generate_content_examples():
         max_tokens=300
     )
     print(f"GPT-4o response:\n{gpt4_response['text']}\n")
-    
+
     # Generate with Claude (for compliance-focused content)
     try:
         claude_response = await llm_manager.generate_text(
@@ -798,7 +798,7 @@ async def generate_content_examples():
         print(f"Claude response:\n{claude_response['text']}\n")
     except ValueError:
         print("Claude client not configured, skipping...")
-    
+
     # Generate with Google Gemini (for more conversational content)
     try:
         gemini_response = await llm_manager.generate_text(
@@ -875,10 +875,10 @@ logger = logging.getLogger(__name__)
 
 async def generate_with_fallback(prompt, system_prompt=None):
     llm_manager = get_llm_manager()
-    
+
     # Define the provider priority order
     providers = ["gpt4o_financial", "claude_sonnet", "gemini_pro"]
-    
+
     for provider in providers:
         try:
             logger.info(f"Attempting to generate text with provider: {provider}")
@@ -895,7 +895,7 @@ async def generate_with_fallback(prompt, system_prompt=None):
             logger.warning(f"Provider {provider} failed: {str(e)}")
             # Continue to next provider
             continue
-    
+
     # If all providers fail, return an error message
     logger.error("All LLM providers failed")
     return "Sorry, our AI services are currently unavailable. Please try again later."
@@ -911,35 +911,35 @@ import numpy as np
 
 async def semantic_search(query, documents):
     llm_manager = get_llm_manager()
-    
+
     # Get embeddings for the query and documents
     query_embedding = await llm_manager.get_embeddings(
         texts=[query],
         client_id="embeddings"  # Use dedicated embeddings model
     )
-    
+
     document_embeddings = await llm_manager.get_embeddings(
         texts=documents,
         client_id="embeddings"
     )
-    
+
     # Calculate cosine similarity
     def cosine_similarity(a, b):
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-    
+
     # Get similarity scores
     similarities = [
         cosine_similarity(query_embedding[0], doc_embedding)
         for doc_embedding in document_embeddings
     ]
-    
+
     # Return documents sorted by similarity
     sorted_documents = [doc for _, doc in sorted(
         zip(similarities, documents),
         key=lambda pair: pair[0],
         reverse=True
     )]
-    
+
     return sorted_documents
 ```
 
@@ -956,27 +956,27 @@ analyzer = SentimentAnalyzer(use_cached=True)
 async def analyze_financial_feedback(feedback):
     # Analyze using the LLM-powered sentiment analyzer
     result = await analyzer.analyze_with_llm(feedback)
-    
+
     # Extract key information
     sentiment = result["sentiment"]
     satisfaction = result["satisfaction_score"]
     key_positives = result["key_positives"]
     key_negatives = result["key_negatives"]
-    
+
     # Create a customer-friendly summary
     summary = f"Sentiment: {sentiment.capitalize()}\n"
     summary += f"Satisfaction: {satisfaction}/10\n"
-    
+
     if key_positives:
         summary += "\nPositive aspects:\n"
         for i, positive in enumerate(key_positives, 1):
             summary += f"{i}. {positive}\n"
-    
+
     if key_negatives:
         summary += "\nAreas for improvement:\n"
         for i, negative in enumerate(key_negatives, 1):
             summary += f"{i}. {negative}\n"
-    
+
     return {
         "raw_analysis": result,
         "summary": summary
@@ -1112,22 +1112,22 @@ with tracer.start_as_current_span("process_customer_data") as span:
     # Add attributes to the span
     span.set_attribute("customer.id", "cust-12345")
     span.set_attribute("data.size", 1024)
-    
+
     try:
         # Record events
         span.add_event("Starting data processing")
-        
+
         # Simulate processing
         time.sleep(0.5)
-        
+
         # Create a child span
         with tracer.start_as_current_span("data_transformation") as child_span:
             child_span.set_attribute("transformation.type", "normalization")
             time.sleep(0.3)
-            
+
         # Record metrics
         telemetry.record_metric("data_processing_duration", 0.8)
-        
+
         # Add another event
         span.add_event("Data processing completed")
     except Exception as e:
@@ -1137,4 +1137,4 @@ with tracer.start_as_current_span("process_customer_data") as span:
         raise
 ```
 
-These examples demonstrate common usage patterns for the CustomerAI Insights Platform. For more specific use cases or advanced integrations, please refer to the full API documentation. 
+These examples demonstrate common usage patterns for the CustomerAI Insights Platform. For more specific use cases or advanced integrations, please refer to the full API documentation.

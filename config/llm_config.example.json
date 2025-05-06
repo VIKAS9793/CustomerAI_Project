@@ -225,4 +225,4 @@
         "code_generation": "gpt4o_standard",
         "compliance_checking": "claude_sonnet"
     }
-} 
+}

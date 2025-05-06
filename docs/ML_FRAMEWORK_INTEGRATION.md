@@ -89,7 +89,7 @@ class FairModel(tf.keras.Model):
         self.dropout2 = tf.keras.layers.Dropout(0.2)
         self.output_layer = tf.keras.layers.Dense(output_dim, activation='sigmoid')
         self.fairness_mitigation = fairness_mitigation
-        
+
     def call(self, inputs, training=False):
         x = self.dense1(inputs)
         x = self.bn1(x, training=training)
@@ -98,47 +98,47 @@ class FairModel(tf.keras.Model):
         x = self.bn2(x, training=training)
         x = self.dropout2(x, training=training)
         return self.output_layer(x)
-    
+
     def train_step(self, data):
         # Unpack the data
         x, y = data
-        
+
         # Get protected attributes (assuming they're part of the input)
         protected = x[:, 0]  # Adjust index based on your data
-        
+
         with tf.GradientTape() as tape:
             y_pred = self(x, training=True)
             loss = self.compiled_loss(y, y_pred)
-            
+
             # Add fairness constraint
             fairness_loss = self._calculate_fairness_loss(y_pred, y, protected)
             total_loss = loss + fairness_loss
-            
+
         # Compute gradients
         gradients = tape.gradient(total_loss, self.trainable_variables)
-        
+
         # Update weights
         self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
-        
+
         # Update metrics
         self.compiled_metrics.update_state(y, y_pred)
-        
+
         # Return metrics
         results = {m.name: m.result() for m in self.metrics}
         results['fairness_loss'] = fairness_loss
         return results
-    
+
     def _calculate_fairness_loss(self, y_pred, y_true, protected):
         # Calculate demographic parity loss
         # This is a simplified example - replace with your specific fairness metric
         protected_mask = tf.cast(protected > 0, tf.float32)
         unprotected_mask = 1.0 - protected_mask
-        
+
         protected_acceptance = tf.reduce_mean(y_pred * protected_mask)
         unprotected_acceptance = tf.reduce_mean(y_pred * unprotected_mask)
-        
+
         demographic_parity_loss = tf.abs(protected_acceptance - unprotected_acceptance)
-        
+
         return demographic_parity_loss * 0.1  # Weight for fairness constraint
 ```
 
@@ -211,7 +211,7 @@ class FairModel(nn.Module):
         self.dropout2 = nn.Dropout(0.2)
         self.output_layer = nn.Linear(32, output_dim)
         self.sigmoid = nn.Sigmoid()
-        
+
     def forward(self, x):
         x = torch.relu(self.layer1(x))
         x = self.bn1(x)
@@ -226,37 +226,37 @@ class FairModel(nn.Module):
 def train_fair_model(model, train_loader, protected_idx, fairness_weight=0.1):
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.BCELoss()
-    
+
     for epoch in range(10):
         for batch_idx, (data, target) in enumerate(train_loader):
             optimizer.zero_grad()
-            
+
             # Forward pass
             output = model(data)
-            
+
             # Standard loss
             loss = criterion(output, target)
-            
+
             # Fairness loss
             protected = data[:, protected_idx]
             protected_mask = (protected > 0).float()
             unprotected_mask = 1.0 - protected_mask
-            
+
             protected_acceptance = torch.mean(output * protected_mask)
             unprotected_acceptance = torch.mean(output * unprotected_mask)
-            
+
             fairness_loss = torch.abs(protected_acceptance - unprotected_acceptance)
-            
+
             # Total loss
             total_loss = loss + fairness_weight * fairness_loss
-            
+
             # Backward pass
             total_loss.backward()
             optimizer.step()
-            
+
             if batch_idx % 100 == 0:
                 print(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item()}, Fairness Loss: {fairness_loss.item()}')
-    
+
     return model
 ```
 
@@ -319,63 +319,63 @@ class FairClassifier(BaseEstimator, ClassifierMixin):
         self.base_estimator = base_estimator or LogisticRegression()
         self.fairness_threshold = fairness_threshold
         self.fairness_mitigation = FairnessMitigation()
-        
+
     def fit(self, X, y):
         # Check inputs
         X, y = check_X_y(X, y)
-        
+
         # Extract protected attribute
         protected = X[:, self.protected_attribute_idx]
-        
+
         # Convert to DataFrame for fairness mitigation
         import pandas as pd
         data = pd.DataFrame(X)
         data['outcome'] = y
         data['protected'] = protected
-        
+
         # Apply reweighing
         reweighted_data, weights = self.fairness_mitigation.reweigh_samples(
             data=data,
             protected_attribute='protected',
             outcome_column='outcome'
         )
-        
+
         # Train base estimator with weights
         self.base_estimator.fit(X, y, sample_weight=weights)
-        
+
         # Save training data info
         self.classes_ = self.base_estimator.classes_
         self.X_ = X
         self.y_ = y
-        
+
         return self
-    
+
     def predict(self, X):
         # Check if fit has been called
         check_is_fitted(self)
-        
+
         # Check input
         X = check_array(X)
-        
+
         # Get base predictions
         base_predictions = self.base_estimator.predict(X)
-        
+
         # Extract protected attribute
         protected = X[:, self.protected_attribute_idx]
-        
+
         # Apply post-processing for fairness
         # This is a simplified example - in practice, you would need test data with ground truth
         # to apply equalized odds post-processing
-        
+
         return base_predictions
-    
+
     def predict_proba(self, X):
         # Check if fit has been called
         check_is_fitted(self)
-        
+
         # Check input
         X = check_array(X)
-        
+
         # Get base probabilities
         return self.base_estimator.predict_proba(X)
 ```
@@ -400,7 +400,7 @@ def train_custom_model(data, features, outcome, protected_attribute):
         protected_attribute=protected_attribute,
         outcome_column=outcome
     )
-    
+
     # Step 2: Train your custom model with the weights
     # This is where you would integrate with your custom framework
     model = YourCustomModel()
@@ -409,7 +409,7 @@ def train_custom_model(data, features, outcome, protected_attribute):
         reweighted_data[outcome],
         sample_weights=weights
     )
-    
+
     # Step 3: Evaluate fairness of the model
     predictions = model.predict(data[features])
     fairness_results = bias_detector.detect_outcome_bias(
@@ -417,7 +417,7 @@ def train_custom_model(data, features, outcome, protected_attribute):
         attributes=[protected_attribute],
         outcome_columns=['predictions']
     )
-    
+
     # Step 4: Apply post-processing if needed
     if fairness_results['summary']['bias_detected']:
         adjusted_predictions = fairness_mitigation.equalized_odds_postprocessing(
@@ -426,7 +426,7 @@ def train_custom_model(data, features, outcome, protected_attribute):
             protected_attributes=data[protected_attribute]
         )
         model.set_post_processor(lambda x: adjust_predictions(x, model, fairness_mitigation))
-    
+
     return model, fairness_results
 
 # Helper function for post-processing

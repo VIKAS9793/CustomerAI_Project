@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./gateway
+    ports:
+      - "${API_GATEWAY_PORT}:8000"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - auth-service
+      - sentiment-service
+    networks:
+      - customerai-network
+
+  sentiment-service:
+    build: ./services/sentiment
+    environment:
+      - DATABASE_URL=${SENTIMENT_DB_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - sentiment-db
+      - redis
+    networks:
+      - customerai-network
+
+  sentiment-db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=${SENTIMENT_DB_USER}
+      - POSTGRES_PASSWORD=${SENTIMENT_DB_PASSWORD}
+      - POSTGRES_DB=${SENTIMENT_DB_NAME}
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - sentiment-data:/var/lib/postgresql/data
+    networks:
+      - customerai-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - customerai-network
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+    networks:
+      - customerai-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./monitoring/grafana:/var/lib/grafana
+    networks:
+      - customerai-network
+
+volumes:
+  sentiment-data:
+  redis-data:
+
+networks:
+  customerai-network:
+    driver: bridge

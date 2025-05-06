@@ -134,14 +134,14 @@ from cloud.ai.llm_manager import get_llm_manager
 
 async def analyze_customer_feedback(feedback_text):
     llm_manager = get_llm_manager()
-    
+
     # Use the default client
     result = await llm_manager.generate_text(
         prompt=f"Analyze this customer feedback: {feedback_text}",
         temperature=0.1,
         max_tokens=500
     )
-    
+
     # Use a specific client
     compliance_result = await llm_manager.generate_text(
         prompt=f"Check if this text contains regulatory issues: {feedback_text}",
@@ -149,7 +149,7 @@ async def analyze_customer_feedback(feedback_text):
         system_prompt="You are a financial compliance expert",
         temperature=0.0
     )
-    
+
     return {
         "analysis": result["text"],
         "compliance_check": compliance_result["text"]
@@ -169,7 +169,7 @@ Example of handling failures:
 ```python
 async def generate_with_fallback(prompt):
     llm_manager = get_llm_manager()
-    
+
     try:
         # Try primary provider
         return await llm_manager.generate_text(
@@ -179,7 +179,7 @@ async def generate_with_fallback(prompt):
         )
     except Exception as e:
         logger.warning(f"Primary provider failed: {str(e)}")
-        
+
         # Fall back to secondary provider
         return await llm_manager.generate_text(
             prompt=prompt,
@@ -233,4 +233,4 @@ The platform includes monitoring for LLM usage:
 
 - Same capabilities as OpenAI but with Azure's security and compliance
 - Data residency options for regulated industries
-- Recommended for enterprise deployments 
+- Recommended for enterprise deployments

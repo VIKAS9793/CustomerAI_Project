@@ -388,4 +388,4 @@ volumes:
   prometheus_data:
   grafana_data:
   models-volume:
-    driver: local 
+    driver: local

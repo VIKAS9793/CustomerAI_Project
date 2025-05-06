@@ -8,4 +8,4 @@ including AWS, Azure, and Google Cloud Platform.
 from cloud.config import CloudConfig
 from cloud.factory import CloudServiceFactory
 
-__all__ = ['CloudConfig', 'CloudServiceFactory'] 
+__all__ = ["CloudConfig", "CloudServiceFactory"]

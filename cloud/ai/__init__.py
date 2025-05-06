@@ -7,4 +7,4 @@ such as AWS SageMaker, Azure Machine Learning, and Google Vertex AI.
 
 from cloud.ai.base import CloudAIClient
 
-__all__ = ['CloudAIClient'] 
+__all__ = ["CloudAIClient"]

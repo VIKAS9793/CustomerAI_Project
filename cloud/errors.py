@@ -13,19 +13,21 @@ Licensed under MIT License - see LICENSE file for details
 
 import logging
 import traceback
-from typing import Dict, Any, Optional, Union, Type
 from enum import Enum
+from typing import Any, Dict, Optional, Union
 
 from cloud.config import CloudProvider
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
+
 # Error categories
 class ErrorCategory(Enum):
     """Categories of cloud service errors."""
+
     CONFIGURATION = "configuration"
-    AUTHENTICATION = "authentication" 
+    AUTHENTICATION = "authentication"
     AUTHORIZATION = "authorization"
     RESOURCE_NOT_FOUND = "resource_not_found"
     RESOURCE_EXISTS = "resource_exists"
@@ -36,22 +38,23 @@ class ErrorCategory(Enum):
     TIMEOUT = "timeout"
     UNKNOWN = "unknown"
 
+
 class CloudError(Exception):
     """Base exception for all cloud-related errors."""
-    
+
     def __init__(
-        self, 
-        message: str, 
+        self,
+        message: str,
         provider: Optional[Union[CloudProvider, str]] = None,
         service: Optional[str] = None,
         category: Optional[Union[ErrorCategory, str]] = None,
         original_exception: Optional[Exception] = None,
         error_code: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize cloud error.
-        
+
         Args:
             message: Error message
             provider: Cloud provider (AWS, Azure, GCP)
@@ -62,7 +65,7 @@ class CloudError(Exception):
             details: Additional error details
         """
         self.message = message
-        
+
         # Set provider
         if isinstance(provider, str):
             try:
@@ -71,10 +74,10 @@ class CloudError(Exception):
                 self.provider = None
         else:
             self.provider = provider
-        
+
         # Set service
         self.service = service
-        
+
         # Set category
         if isinstance(category, str):
             try:
@@ -83,47 +86,47 @@ class CloudError(Exception):
                 self.category = ErrorCategory.UNKNOWN
         else:
             self.category = category or ErrorCategory.UNKNOWN
-        
+
         # Set original exception
         self.original_exception = original_exception
-        
+
         # Set error code
         self.error_code = error_code
-        
+
         # Set details
         self.details = details or {}
-        
+
         # Generate traceback for debugging
         self.traceback = traceback.format_exc() if original_exception else None
-        
+
         # Call parent constructor
         super().__init__(self.message)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert error to dictionary representation."""
         result = {
             "message": self.message,
             "category": self.category.value if self.category else None,
         }
-        
+
         if self.provider:
             result["provider"] = self.provider.value
-        
+
         if self.service:
             result["service"] = self.service
-        
+
         if self.error_code:
             result["error_code"] = self.error_code
-        
+
         if self.details:
             result["details"] = self.details
-        
+
         return result
-    
+
     def log(self, level: int = logging.ERROR) -> None:
         """Log the error with appropriate level."""
         error_dict = self.to_dict()
-        
+
         # Add provider-specific information
         if self.provider and self.service:
             prefix = f"{self.provider.value.upper()}:{self.service}"
@@ -133,14 +136,14 @@ class CloudError(Exception):
             prefix = self.service
         else:
             prefix = "CLOUD"
-        
+
         # Create log message
         log_message = f"{prefix} Error: {self.message}"
-        
+
         # Add error code if available
         if self.error_code:
             log_message += f" (Code: {self.error_code})"
-        
+
         # Log with appropriate level
         if level == logging.DEBUG:
             logger.debug(log_message, extra={"error_details": error_dict})
@@ -152,10 +155,12 @@ class CloudError(Exception):
             logger.error(log_message, extra={"error_details": error_dict})
         elif level == logging.CRITICAL:
             logger.critical(log_message, extra={"error_details": error_dict})
-        
+
         # Log original exception traceback
         if self.original_exception and level >= logging.ERROR:
-            logger.debug(f"Original exception: {type(self.original_exception).__name__}: {str(self.original_exception)}")
+            logger.debug(
+                f"Original exception: {type(self.original_exception).__name__}: {str(self.original_exception)}"
+            )
             if self.traceback:
                 logger.debug(f"Traceback: {self.traceback}")
 
@@ -163,7 +168,7 @@ class CloudError(Exception):
 # Specific error types
 class CloudConfigurationError(CloudError):
     """Error in cloud service configuration."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with configuration error category."""
         kwargs["category"] = ErrorCategory.CONFIGURATION
@@ -172,7 +177,7 @@ class CloudConfigurationError(CloudError):
 
 class CloudAuthenticationError(CloudError):
     """Error in cloud service authentication."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with authentication error category."""
         kwargs["category"] = ErrorCategory.AUTHENTICATION
@@ -181,7 +186,7 @@ class CloudAuthenticationError(CloudError):
 
 class CloudAuthorizationError(CloudError):
     """Error in cloud service authorization."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with authorization error category."""
         kwargs["category"] = ErrorCategory.AUTHORIZATION
@@ -190,7 +195,7 @@ class CloudAuthorizationError(CloudError):
 
 class CloudResourceNotFoundError(CloudError):
     """Error when cloud resource is not found."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with resource not found error category."""
         kwargs["category"] = ErrorCategory.RESOURCE_NOT_FOUND
@@ -199,7 +204,7 @@ class CloudResourceNotFoundError(CloudError):
 
 class CloudResourceExistsError(CloudError):
     """Error when cloud resource already exists."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with resource exists error category."""
         kwargs["category"] = ErrorCategory.RESOURCE_EXISTS
@@ -208,7 +213,7 @@ class CloudResourceExistsError(CloudError):
 
 class CloudServiceUnavailableError(CloudError):
     """Error when cloud service is unavailable."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with service unavailable error category."""
         kwargs["category"] = ErrorCategory.SERVICE_UNAVAILABLE
@@ -217,7 +222,7 @@ class CloudServiceUnavailableError(CloudError):
 
 class CloudQuotaExceededError(CloudError):
     """Error when cloud service quota is exceeded."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with quota exceeded error category."""
         kwargs["category"] = ErrorCategory.QUOTA_EXCEEDED
@@ -226,7 +231,7 @@ class CloudQuotaExceededError(CloudError):
 
 class CloudInvalidRequestError(CloudError):
     """Error when cloud service request is invalid."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with invalid request error category."""
         kwargs["category"] = ErrorCategory.INVALID_REQUEST
@@ -235,7 +240,7 @@ class CloudInvalidRequestError(CloudError):
 
 class CloudNetworkError(CloudError):
     """Error in cloud service network communication."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with network error category."""
         kwargs["category"] = ErrorCategory.NETWORK
@@ -244,7 +249,7 @@ class CloudNetworkError(CloudError):
 
 class CloudTimeoutError(CloudError):
     """Error when cloud service operation times out."""
-    
+
     def __init__(self, message: str, **kwargs):
         """Initialize with timeout error category."""
         kwargs["category"] = ErrorCategory.TIMEOUT
@@ -255,85 +260,90 @@ class CloudTimeoutError(CloudError):
 def handle_aws_error(e: Exception, service: str, operation: str) -> CloudError:
     """
     Convert AWS exception to standardized CloudError.
-    
+
     Args:
         e: AWS exception
         service: AWS service name
         operation: Operation being performed
-        
+
     Returns:
         Standardized CloudError
     """
-    from botocore.exceptions import ClientError, BotoCoreError
-    
+    from botocore.exceptions import BotoCoreError, ClientError
+
     if isinstance(e, ClientError):
-        error_response = getattr(e, 'response', {})
-        error_code = error_response.get('Error', {}).get('Code', 'Unknown')
-        error_message = error_response.get('Error', {}).get('Message', str(e))
-        
+        error_response = getattr(e, "response", {})
+        error_code = error_response.get("Error", {}).get("Code", "Unknown")
+        error_message = error_response.get("Error", {}).get("Message", str(e))
+
         # Map common AWS error codes to error categories
-        if error_code in ('AccessDenied', 'Forbidden'):
+        if error_code in ("AccessDenied", "Forbidden"):
             return CloudAuthorizationError(
                 f"Access denied for {operation} on {service}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
-        elif error_code in ('InvalidAccessKeyId', 'InvalidSecurity', 'InvalidToken', 'MissingAuthenticationToken'):
+        elif error_code in (
+            "InvalidAccessKeyId",
+            "InvalidSecurity",
+            "InvalidToken",
+            "MissingAuthenticationToken",
+        ):
             return CloudAuthenticationError(
                 f"Authentication failed for {operation} on {service}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
-        elif error_code == 'NoSuchBucket' or error_code == 'NoSuchKey' or error_code == '404':
+        elif error_code == "NoSuchBucket" or error_code == "NoSuchKey" or error_code == "404":
             return CloudResourceNotFoundError(
                 f"Resource not found for {operation} on {service}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
-        elif error_code == 'BucketAlreadyExists' or error_code == 'BucketAlreadyOwnedByYou':
+        elif error_code == "BucketAlreadyExists" or error_code == "BucketAlreadyOwnedByYou":
             return CloudResourceExistsError(
                 f"Resource already exists for {operation} on {service}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
-        elif error_code == 'ServiceUnavailable':
+        elif error_code == "ServiceUnavailable":
             return CloudServiceUnavailableError(
                 f"Service unavailable for {operation} on {service}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
-        elif error_code == 'ThrottlingException' or error_code == 'RequestLimitExceeded':
+        elif error_code == "ThrottlingException" or error_code == "RequestLimitExceeded":
             return CloudQuotaExceededError(
                 f"Rate limit exceeded for {operation} on {service}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
-        elif error_code == 'InvalidRequest' or error_code == 'ValidationError':
+        elif error_code == "InvalidRequest" or error_code == "ValidationError":
             return CloudInvalidRequestError(
                 f"Invalid request for {operation} on {service}: {error_message}",
                 provider=CloudProvider.AWS,
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
         else:
             return CloudError(
@@ -342,7 +352,7 @@ def handle_aws_error(e: Exception, service: str, operation: str) -> CloudError:
                 service=service,
                 original_exception=e,
                 error_code=error_code,
-                details={"operation": operation, "message": error_message}
+                details={"operation": operation, "message": error_message},
             )
     elif isinstance(e, BotoCoreError):
         return CloudNetworkError(
@@ -350,7 +360,7 @@ def handle_aws_error(e: Exception, service: str, operation: str) -> CloudError:
             provider=CloudProvider.AWS,
             service=service,
             original_exception=e,
-            details={"operation": operation}
+            details={"operation": operation},
         )
     else:
         return CloudError(
@@ -358,36 +368,39 @@ def handle_aws_error(e: Exception, service: str, operation: str) -> CloudError:
             provider=CloudProvider.AWS,
             service=service,
             original_exception=e,
-            details={"operation": operation}
+            details={"operation": operation},
         )
 
 
 def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError:
     """
     Convert Azure exception to standardized CloudError.
-    
+
     Args:
         e: Azure exception
         service: Azure service name
         operation: Operation being performed
-        
+
     Returns:
         Standardized CloudError
     """
     # Import Azure SDK exceptions here to avoid dependency if not using Azure
     try:
         from azure.core.exceptions import (
-            AzureError, ResourceNotFoundError, ResourceExistsError,
-            ClientAuthenticationError, HttpResponseError
+            AzureError,
+            ClientAuthenticationError,
+            HttpResponseError,
+            ResourceExistsError,
+            ResourceNotFoundError,
         )
-        
+
         if isinstance(e, ResourceNotFoundError):
             return CloudResourceNotFoundError(
                 f"Resource not found for {operation} on {service}",
                 provider=CloudProvider.AZURE,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         elif isinstance(e, ResourceExistsError):
             return CloudResourceExistsError(
@@ -395,7 +408,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                 provider=CloudProvider.AZURE,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         elif isinstance(e, ClientAuthenticationError):
             return CloudAuthenticationError(
@@ -403,11 +416,11 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                 provider=CloudProvider.AZURE,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         elif isinstance(e, HttpResponseError):
-            status_code = getattr(e, 'status_code', None)
-            
+            status_code = getattr(e, "status_code", None)
+
             if status_code == 401:
                 return CloudAuthenticationError(
                     f"Authentication failed for {operation} on {service}",
@@ -415,7 +428,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif status_code == 403:
                 return CloudAuthorizationError(
@@ -424,7 +437,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif status_code == 404:
                 return CloudResourceNotFoundError(
@@ -433,7 +446,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif status_code == 409:
                 return CloudResourceExistsError(
@@ -442,7 +455,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif status_code == 429:
                 return CloudQuotaExceededError(
@@ -451,7 +464,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif status_code >= 400 and status_code < 500:
                 return CloudInvalidRequestError(
@@ -460,7 +473,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif status_code >= 500:
                 return CloudServiceUnavailableError(
@@ -469,7 +482,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             else:
                 return CloudError(
@@ -478,7 +491,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                     service=service,
                     original_exception=e,
                     error_code=str(status_code) if status_code else None,
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
         elif isinstance(e, AzureError):
             return CloudError(
@@ -486,7 +499,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                 provider=CloudProvider.AZURE,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         else:
             return CloudError(
@@ -494,7 +507,7 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
                 provider=CloudProvider.AZURE,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
     except ImportError:
         # Azure SDK not installed
@@ -503,34 +516,34 @@ def handle_azure_error(e: Exception, service: str, operation: str) -> CloudError
             provider=CloudProvider.AZURE,
             service=service,
             original_exception=e,
-            details={"operation": operation, "message": str(e)}
+            details={"operation": operation, "message": str(e)},
         )
 
 
 def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
     """
     Convert GCP exception to standardized CloudError.
-    
+
     Args:
         e: GCP exception
         service: GCP service name
         operation: Operation being performed
-        
+
     Returns:
         Standardized CloudError
     """
     # Import Google Cloud exceptions here to avoid dependency if not using GCP
     try:
-        from google.api_core.exceptions import GoogleAPIError, NotFound, AlreadyExists
+        from google.api_core.exceptions import AlreadyExists, GoogleAPIError, NotFound
         from google.auth.exceptions import GoogleAuthError
-        
+
         if isinstance(e, NotFound):
             return CloudResourceNotFoundError(
                 f"Resource not found for {operation} on {service}",
                 provider=CloudProvider.GCP,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         elif isinstance(e, AlreadyExists):
             return CloudResourceExistsError(
@@ -538,7 +551,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                 provider=CloudProvider.GCP,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         elif isinstance(e, GoogleAuthError):
             return CloudAuthenticationError(
@@ -546,12 +559,12 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                 provider=CloudProvider.GCP,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
         elif isinstance(e, GoogleAPIError):
             # Extract error code if available
-            error_code = getattr(e, 'code', None)
-            
+            error_code = getattr(e, "code", None)
+
             if error_code == 401:
                 return CloudAuthenticationError(
                     f"Authentication failed for {operation} on {service}",
@@ -559,7 +572,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif error_code == 403:
                 return CloudAuthorizationError(
@@ -568,7 +581,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif error_code == 404:
                 return CloudResourceNotFoundError(
@@ -577,7 +590,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif error_code == 409:
                 return CloudResourceExistsError(
@@ -586,7 +599,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif error_code == 429:
                 return CloudQuotaExceededError(
@@ -595,7 +608,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif error_code == 400:
                 return CloudInvalidRequestError(
@@ -604,7 +617,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             elif error_code == 503:
                 return CloudServiceUnavailableError(
@@ -613,7 +626,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code),
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
             else:
                 return CloudError(
@@ -622,7 +635,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                     service=service,
                     original_exception=e,
                     error_code=str(error_code) if error_code else None,
-                    details={"operation": operation, "message": str(e)}
+                    details={"operation": operation, "message": str(e)},
                 )
         else:
             return CloudError(
@@ -630,7 +643,7 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
                 provider=CloudProvider.GCP,
                 service=service,
                 original_exception=e,
-                details={"operation": operation, "message": str(e)}
+                details={"operation": operation, "message": str(e)},
             )
     except ImportError:
         # Google Cloud SDK not installed
@@ -639,20 +652,22 @@ def handle_gcp_error(e: Exception, service: str, operation: str) -> CloudError:
             provider=CloudProvider.GCP,
             service=service,
             original_exception=e,
-            details={"operation": operation, "message": str(e)}
+            details={"operation": operation, "message": str(e)},
         )
 
 
-def handle_cloud_error(e: Exception, provider: Union[CloudProvider, str], service: str, operation: str) -> CloudError:
+def handle_cloud_error(
+    e: Exception, provider: Union[CloudProvider, str], service: str, operation: str
+) -> CloudError:
     """
     Convert any cloud provider exception to standardized CloudError.
-    
+
     Args:
         e: Provider-specific exception
         provider: Cloud provider
         service: Service name
         operation: Operation being performed
-        
+
     Returns:
         Standardized CloudError
     """
@@ -662,7 +677,7 @@ def handle_cloud_error(e: Exception, provider: Union[CloudProvider, str], servic
             provider = CloudProvider(provider.lower())
         except ValueError:
             provider = None
-    
+
     # Handle based on provider
     if provider == CloudProvider.AWS:
         return handle_aws_error(e, service, operation)
@@ -677,5 +692,5 @@ def handle_cloud_error(e: Exception, provider: Union[CloudProvider, str], servic
             provider=provider,
             service=service,
             original_exception=e,
-            details={"operation": operation}
-        ) 
+            details={"operation": operation},
+        )

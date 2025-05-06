@@ -1,4 +1,228 @@
 # CustomerAI Insights Platform - Configuration Guide
+*Last Updated: May 5, 2025*
+
+## Overview
+
+This guide details the configuration options and best practices for the CustomerAI project. The project uses a hierarchical configuration system that supports multiple sources (environment variables, configuration files, and code-based settings).
+
+## Core Configuration
+
+### Environment Variables
+
+Copy the `env.example` file to `.env` and configure the following required variables:
+
+```bash
+# API Configuration
+PORT=8000
+DEBUG=false
+API_KEY=your_secure_api_key
+
+# Security Settings
+SECRET_KEY=your_secure_secret_key
+TOKEN_EXPIRATION=3600
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_WINDOW=3600
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=customerai
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+
+# Logging Configuration
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+```
+
+### Fairness Framework Configuration
+
+The fairness framework can be configured through `config/fairness_config.py`:
+
+```python
+FAIRNESS_CONFIG = {
+    'bias_detection': {
+        'threshold': 0.15,
+        'significance_level': 0.05,
+        'metrics': ['disparate_impact', 'equal_opportunity']
+    },
+    'mitigation': {
+        'strategies': ['reweighing', 'prejudice_remover'],
+        'max_iterations': 100
+    },
+    'dashboard': {
+        'page_size': 1000,
+        'cache_timeout': 3600
+    }
+}
+```
+
+## Security Configuration
+
+### Rate Limiting
+
+Rate limiting is configured through environment variables and can be customized per endpoint:
+
+```python
+RATE_LIMIT_CONFIG = {
+    'default': {
+        'requests': 100,
+        'window': 3600
+    },
+    '/api/v1/generate': {
+        'requests': 50,
+        'window': 3600
+    }
+}
+```
+
+### Device Security
+
+Device validation is enforced through headers:
+- X-Device-Id
+- X-Device-Model
+- X-OS-Version
+- X-App-Version
+
+Configure validation rules in `config/security_config.py`.
+
+## Performance Tuning
+
+### Dashboard Configuration
+
+Optimize dashboard performance through:
+
+```python
+DASHBOARD_CONFIG = {
+    'cache_enabled': True,
+    'cache_timeout': 3600,
+    'page_size': 1000,
+    'max_memory_usage': '2GB'
+}
+```
+
+### API Performance
+
+Tune API performance with:
+
+```python
+API_CONFIG = {
+    'worker_count': 4,
+    'timeout': 30,
+    'keep_alive': True,
+    'max_request_size': '10MB'
+}
+```
+
+## Logging Configuration
+
+Configure logging through `config/logging_config.py`:
+
+```python
+LOGGING_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        },
+        'json': {
+            'class': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(timestamp)s %(level)s %(name)s %(message)s'
+        }
+    },
+    'handlers': {
+        'default': {
+            'level': 'INFO',
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout'
+        },
+        'file': {
+            'level': 'INFO',
+            'formatter': 'json',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/customerai.log',
+            'maxBytes': 10485760,
+            'backupCount': 5
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default', 'file'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
+}
+```
+
+## Testing Configuration
+
+Configure test settings in `config/test_config.py`:
+
+```python
+TEST_CONFIG = {
+    'mock_data_size': 1000,
+    'test_timeout': 30,
+    'coverage_threshold': 80,
+    'parallel_tests': True
+}
+```
+
+## Production Deployment
+
+### Docker Configuration
+
+Customize `docker-compose.yml` for production:
+
+```yaml
+version: '3.8'
+services:
+  api:
+    build: .
+    environment:
+      - PORT=8000
+      - DEBUG=false
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+## Best Practices
+
+1. **Security**
+   - Never commit sensitive data
+   - Rotate secrets regularly
+   - Use strong, unique keys
+   - Enable rate limiting
+
+2. **Performance**
+   - Monitor memory usage
+   - Configure appropriate cache settings
+   - Tune database connections
+   - Set reasonable timeouts
+
+3. **Logging**
+   - Use appropriate log levels
+   - Implement log rotation
+   - Configure structured logging
+   - Monitor log storage
+
+4. **Testing**
+   - Maintain high coverage
+   - Use realistic test data
+   - Configure CI/CD properly
+   - Regular security scans
+
+> For local development, add credentials to your own untracked files. Do not commit secret-like patterns.
 
 This document provides detailed information about configuring and customizing the CustomerAI Insights Platform for various environments and use cases.
 
@@ -26,41 +250,12 @@ The platform uses a multi-layered configuration system:
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `DATABASE_URI` | Database connection URI | `sqlite:///customerai_dev.db` | Yes |
-| `DATABASE_POOL_SIZE` | Connection pool size | `5` | No |
-| `DATABASE_MAX_OVERFLOW` | Maximum pool overflow | `10` | No |
-
-### API Keys and Security
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `OPENAI_API_KEY` | OpenAI API key | None | Yes |
-| `JWT_SECRET_KEY` | Secret key for JWT token generation | Auto-generated (not for production) | Yes (for production) |
-| `ENCRYPTION_KEY` | Key for sensitive data encryption | None | Yes (for production) |
-| `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | `*` | No |
-
-### Logging
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | `INFO` | No |
-| `LOG_FORMAT` | Log format (standard, json) | `standard` | No |
-| `LOG_DIR` | Directory for log files | `logs` | No |
-
-### Feature Flags
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `ENABLE_HUMAN_REVIEW` | Enable human review workflow | `true` | No |
-| `ENABLE_BIAS_DETECTION` | Enable bias detection | `true` | No |
-| `ENABLE_PRIVACY_FEATURES` | Enable privacy protection | `true` | No |
 
 ### AI Settings
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `AI_MAX_TOKENS` | Maximum tokens for AI responses | `500` | No |
-| `AI_TEMPERATURE` | Temperature for response generation | `0.7` | No |
 | `AI_REQUEST_TIMEOUT` | Timeout for AI API requests (seconds) | `30` | No |
 | `AI_MOCK` | Use mock AI responses (for testing) | `false` | No |
 
@@ -75,10 +270,7 @@ The platform also supports a JSON configuration file that can be specified with 
   "DEBUG": false,
   "API_PREFIX": "/api/v1",
   "API_RATE_LIMIT": 100,
-  "DATABASE_URI": "postgresql://username:password@localhost:5432/customerai",
-  "OPENAI_API_KEY": "your-api-key",
-  "JWT_SECRET_KEY": "your-secret-key-here",
-  "LOG_LEVEL": "INFO",
+
   "WORKER_THREADS": 4,
   "FEATURES": {
     "human_in_loop": true,
@@ -99,7 +291,6 @@ The platform includes pre-defined configurations for different environments:
 Optimized for local development with:
 - Debug mode enabled
 - Verbose logging
-- SQLite database
 - Relaxed security settings
 
 To activate:
@@ -112,7 +303,7 @@ export ENVIRONMENT=development
 Optimized for automated testing with:
 - In-memory database
 - Mock AI responses
-- Test secret keys
+- Test settings
 - All features enabled
 
 To activate:
@@ -126,22 +317,16 @@ Optimized for production deployment with:
 - Performance optimizations
 - Strict security settings
 - Warning-level logging in JSON format
-- Required environment variables for secrets
 
 To activate:
 ```
 export ENVIRONMENT=production
-export DATABASE_URI=postgresql://user:password@dbhost:5432/customerai
-export OPENAI_API_KEY=your-api-key
-export JWT_SECRET_KEY=your-jwt-secret
-export ENCRYPTION_KEY=your-encryption-key
 ```
 
 ### Docker Environment
 
 Extends production configuration with Docker-specific settings:
 - Paths configured for container volumes
-- Database connection to container services
 - Log files directed to mounted volumes
 
 ## Advanced Configuration
@@ -190,15 +375,15 @@ SENTIMENT_THRESHOLDS = {
 
 ### Customizing AI Models
 
-Configure which OpenAI models to use:
+Configure which AI models to use:
 
 ```python
 # In config/config.py
 AI_MODELS = {
-    "sentiment": "gpt-4",
-    "response_generation": "gpt-4",
-    "compliance_validation": "gpt-4",
-    "bias_detection": "gpt-4"
+    "sentiment": "",
+    "response_generation": "",
+    "compliance_validation": "",
+    "bias_detection": ""
 }
 ```
 
@@ -212,7 +397,6 @@ HUMAN_REVIEW = {
     "queue_limit": 1000,  # Maximum items in review queue
     "auto_approve_threshold": 0.95,  # Auto-approve items with confidence >= 0.95
     "high_priority_threshold": 0.3,  # Items with confidence <= 0.3 are high priority
-    "notification_email": "reviewers@example.com"
 }
 ```
 
@@ -246,7 +430,7 @@ from src.utils.logger import get_logger
 
 # Component-specific logger with custom settings
 logger = get_logger(
-    'sentiment_analyzer', 
+    'sentiment_analyzer',
     log_level=logging.DEBUG,
     log_file='logs/sentiment.log',
     json_format=True
@@ -294,19 +478,19 @@ If the application fails to start with an error about missing environment variab
 
 If you encounter database connection errors:
 
-1. Verify the `DATABASE_URI` is correct
-2. Ensure the database server is running
-3. Check firewall settings
-4. Verify database credentials
+1. Verify the database server is running
+2. Check firewall settings
+3. Verify database credentials
 
-### OpenAI API Errors
+### AI and ML Configuration
 
-If you experience OpenAI API errors:
+### JAX Configuration
 
-1. Verify your `OPENAI_API_KEY` is valid
-2. Check your API usage and limits
-3. Check if you have billing enabled on your OpenAI account
-4. Set `AI_MOCK=true` for testing without API calls
+JAX is used for high-performance numerical computing. Configure JAX specific settings in your `.env` file:
+
+```
+
+```
 
 ## AI and ML Configuration
 

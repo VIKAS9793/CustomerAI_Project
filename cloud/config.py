@@ -5,11 +5,12 @@ This module handles configuration for different cloud providers
 and ensures credentials and settings are properly managed.
 """
 
-import os
 import json
 import logging
-from typing import Dict, Any, Optional, Union
+import os
 from enum import Enum
+from typing import Any, Dict, Union
+
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -17,36 +18,41 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 class CloudProvider(Enum):
     """Supported cloud service providers."""
+
     AWS = "aws"
     AZURE = "azure"
     GCP = "gcp"
     NONE = "none"
 
+
 class CloudConfig:
     """
     Configuration manager for cloud service providers.
-    
+
     This class handles loading and providing access to configuration
     settings for different cloud providers.
     """
-    
+
     def __init__(self, provider: Union[CloudProvider, str] = None):
         """
         Initialize cloud configuration.
-        
+
         Args:
             provider: Cloud provider to use (AWS, Azure, GCP)
         """
         self.configs = {}
-        
+
         # Determine provider
         if provider is None:
             # Try to get from environment
             provider_str = os.getenv("CLOUD_PROVIDER", "")
             try:
-                self.provider = CloudProvider(provider_str.lower()) if provider_str else CloudProvider.NONE
+                self.provider = (
+                    CloudProvider(provider_str.lower()) if provider_str else CloudProvider.NONE
+                )
             except ValueError:
                 logger.warning(f"Unknown cloud provider: {provider_str}, defaulting to none")
                 self.provider = CloudProvider.NONE
@@ -58,10 +64,10 @@ class CloudConfig:
             except ValueError:
                 logger.warning(f"Unknown cloud provider: {provider}, defaulting to none")
                 self.provider = CloudProvider.NONE
-        
+
         # Load configurations
         self._load_configs()
-    
+
     def _load_configs(self) -> None:
         """Load configuration for all providers from environment and config files."""
         # AWS Configuration
@@ -78,7 +84,7 @@ class CloudConfig:
             "sagemaker_endpoint": os.getenv("AWS_SAGEMAKER_ENDPOINT", ""),
             "cloudwatch_log_group": os.getenv("AWS_CLOUDWATCH_LOG_GROUP", "/customerai/logs"),
         }
-        
+
         # Azure Configuration
         self.configs[CloudProvider.AZURE] = {
             "tenant_id": os.getenv("AZURE_TENANT_ID", ""),
@@ -95,7 +101,7 @@ class CloudConfig:
             "ml_workspace": os.getenv("AZURE_ML_WORKSPACE", "customerai-ml"),
             "app_insights_key": os.getenv("AZURE_APP_INSIGHTS_KEY", ""),
         }
-        
+
         # GCP Configuration
         self.configs[CloudProvider.GCP] = {
             "project_id": os.getenv("GCP_PROJECT_ID", ""),
@@ -108,14 +114,14 @@ class CloudConfig:
             "kms_key_name": os.getenv("GCP_KMS_KEY_NAME", "customerai-key"),
             "logging_name": os.getenv("GCP_LOGGING_NAME", "customerai-logs"),
         }
-        
+
         # Try to load from config file if it exists
         config_file = os.getenv("CLOUD_CONFIG_FILE", "cloud_config.json")
         if os.path.exists(config_file):
             try:
-                with open(config_file, 'r') as f:
+                with open(config_file, "r") as f:
                     file_configs = json.load(f)
-                    
+
                 # Update configs with file values
                 for provider_name, config in file_configs.items():
                     try:
@@ -124,17 +130,17 @@ class CloudConfig:
                             self.configs[provider].update(config)
                     except ValueError:
                         logger.warning(f"Unknown provider in config file: {provider_name}")
-                        
+
             except Exception as e:
                 logger.error(f"Error loading cloud config file: {str(e)}")
-    
+
     def get_config(self, provider: Union[CloudProvider, str] = None) -> Dict[str, Any]:
         """
         Get configuration for specified provider.
-        
+
         Args:
             provider: Cloud provider (defaults to the initialized provider)
-            
+
         Returns:
             Dict of configuration values
         """
@@ -146,21 +152,21 @@ class CloudConfig:
             except ValueError:
                 logger.warning(f"Unknown provider: {provider}, returning empty config")
                 return {}
-        
+
         return self.configs.get(provider, {})
-    
+
     def is_configured(self, provider: Union[CloudProvider, str] = None) -> bool:
         """
         Check if a provider is properly configured with required credentials.
-        
+
         Args:
             provider: Cloud provider to check
-            
+
         Returns:
             True if properly configured, False otherwise
         """
         config = self.get_config(provider)
-        
+
         if provider is None:
             provider = self.provider
         elif isinstance(provider, str):
@@ -168,26 +174,27 @@ class CloudConfig:
                 provider = CloudProvider(provider.lower())
             except ValueError:
                 return False
-        
+
         # Check required fields for each provider
         if provider == CloudProvider.AWS:
             return bool(config.get("access_key_id")) and bool(config.get("secret_access_key"))
         elif provider == CloudProvider.AZURE:
-            return (bool(config.get("tenant_id")) and 
-                    bool(config.get("client_id")) and 
-                    bool(config.get("client_secret")))
+            return (
+                bool(config.get("tenant_id"))
+                and bool(config.get("client_id"))
+                and bool(config.get("client_secret"))
+            )
         elif provider == CloudProvider.GCP:
             return bool(config.get("project_id")) and (
-                bool(config.get("credentials_file")) or 
-                os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+                bool(config.get("credentials_file")) or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
             )
-        
+
         return False
-    
+
     def get_current_provider(self) -> CloudProvider:
         """Get the currently configured cloud provider."""
         return self.provider
-    
+
     def get_provider_name(self) -> str:
         """Get the name of the currently configured cloud provider."""
-        return self.provider.value 
+        return self.provider.value

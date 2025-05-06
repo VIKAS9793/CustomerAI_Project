@@ -9,4 +9,4 @@ from src.fairness.bias_detector import BiasDetector
 from src.fairness.dashboard import FairnessDashboard
 from src.fairness.mitigation import FairnessMitigation
 
-__all__ = ['BiasDetector', 'FairnessDashboard', 'FairnessMitigation']
+__all__ = ["BiasDetector", "FairnessDashboard", "FairnessMitigation"]

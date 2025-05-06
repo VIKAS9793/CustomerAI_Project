@@ -4,9 +4,9 @@
 # Core dependencies
 fastapi>=0.110.0
 uvicorn>=0.27.1
-pydantic>=2.5.0  # Updated for Python 3.12 compatibility
+pydantic>=2.5.0  # Updated for Python 3.10 compatibility
 python-dotenv>=1.0.0
-pandas>=2.2.0  # Updated for Python 3.12 compatibility
+pandas>=2.2.0  # Updated for Python 3.10 compatibility
 numpy>=1.26.0
 scikit-learn>=1.4.0
 streamlit>=1.32.0
@@ -14,7 +14,7 @@ pytest>=8.0.0
 python-jose>=3.3.0
 passlib>=1.7.4
 argon2-cffi>=21.3.0
-argon2-cffi-bindings==21.2.0  # Pinned version for Python 3.12 compatibility
+argon2-cffi-bindings==21.2.0  # Pinned version for Python 3.10 compatibility
 cryptography>=42.0.0
 httpx>=0.26.0
 aiohttp>=3.9.0
@@ -187,4 +187,4 @@ llama-index>=0.10.0    # Framework for building RAG systems
 
 # LLM Security and Monitoring
 langchain-monitor>=0.2.0  # Monitoring for LLM applications
-llm-guard>=0.3.0       # Security and filtering for LLM applications 
+llm-guard>=0.3.0       # Security and filtering for LLM applications

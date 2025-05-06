@@ -8,6 +8,26 @@ A comprehensive cloud infrastructure framework that provides a unified interface
 
 The CustomerAI Insights Platform enables businesses to harness the power of AI for customer analytics while maintaining the highest standards of security, compliance, and governance. It provides a flexible, multi-cloud architecture that supports rapid development and deployment of customer analysis applications.
 
+## Project Structure
+
+```
+src/
+├── config/        # Configuration management
+├── fairness/      # Fairness and bias detection framework
+├── human_review/  # Human-in-the-loop review system
+├── privacy/       # Privacy controls and data protection
+├── response/      # Response generation and management
+├── sentiment/     # Sentiment analysis components
+└── utils/         # Shared utilities and helpers
+```
+
+## Technical Requirements
+
+- Python 3.10 (standardized across all components)
+- Docker 24.0.0 or later
+- Node.js 18.x LTS (for web dashboard)
+
+
 ## Key Features
 
 ### Cloud Integration
@@ -33,7 +53,7 @@ The CustomerAI Insights Platform enables businesses to harness the power of AI f
 - **Model Cards**: Comprehensive documentation of all models following industry standards
 - **LLM Guardrails**: Robust protection against harmful content, prompt injection, and other risks
 - **Responsible AI Framework**: Comprehensive governance structure aligned with NIST AI RMF and EU AI Act
-- **Enterprise-Ready Fairness Framework**: 
+- **Enterprise-Ready Fairness Framework**:
   - Advanced bias detection with multiple fairness metrics (disparate impact, statistical parity, equal opportunity, predictive parity)
   - Statistical significance testing with configurable thresholds for reliable bias detection
   - Interactive fairness visualization dashboard with memory-efficient data handling for large datasets
@@ -182,6 +202,38 @@ Contributions are welcome! Please check out our [contribution guidelines](CONTRI
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
+
+## Local Testing: Demo/Test Secrets
+
+To ensure security and compliance, demo/test secrets are not tracked in the repository. If you need to run the application or tests locally with demo secrets, add them to your own untracked files as follows:
+
+### .env (or env.example)
+```
+REVIEW_DASHBOARD_DEMO=demo_dashboard_value
+```
+
+### CONFIGURATION.md (or your config file)
+```
+"DEMO_JWT_SECRET": "demo_value",
+```
+
+### Shell/Environment
+```
+export DEMO_OPENAI_API_KEY=demo_value
+```
+
+### Python Test (test_e2e.py)
+```
+test_data = {
+    "test": "data",
+    "demo_secret": "demo_value",
+    "demo_password": "demo_value",
+}
+```
+
+> **Note:** Never commit demo/test secrets to the repository. Only add them to your local, untracked files for development and testing purposes.
+
 The MIT License applies only to the original code in this project, not to any third-party dependencies. See [DEPENDENCIES.md](DEPENDENCIES.md) for details on third-party components and their licenses.
 
 ## Author
@@ -197,14 +249,14 @@ The MIT License applies only to the original code in this project, not to any th
 
 ### Key Technologies
 
-- **Python 3.12**: Latest stable Python version with improved performance and features
+- **Python 3.10**: Latest stable Python version with improved performance and features
 - **Modern AI & ML Stack**:
   - **JAX**: High-performance numerical computing with automatic differentiation
   - **Ray**: Distributed computing framework for scaling AI/ML workloads
   - **MLflow**: Platform for managing ML lifecycle including tracking, deployment
   - **Hugging Face Transformers**: State-of-the-art NLP models and tools
   - **DeepSpeed**: Optimization library for large-scale model training
-- **Kubernetes Integration**: 
+- **Kubernetes Integration**:
   - Native deployment on Kubernetes clusters
   - Kubeflow Pipelines for ML workflows
   - Seldon Core for model serving
@@ -215,6 +267,23 @@ The MIT License applies only to the original code in this project, not to any th
 - **Cloud Provider SDKs**: Latest versions of AWS, Azure, and GCP Python SDKs
 
 ## Table of Contents
+
+- [Comprehensive Q&A for All Users](./PROJECT_QA_ALL_USERS.md): Frequently asked questions and answers for executives, developers, auditors, and end-users. Covers security, readiness, onboarding, risk, and support.
+- [Claim-to-Evidence Mapping](./PROJECT_CLAIM_EVIDENCE_MAP.md): Trace every major project claim to its supporting files, configs, or tests for full transparency and auditability.
+- [Project Security & Readiness](./PROJECT_SECURITY_AND_READINESS.md): Evidence-based documentation of security controls, readiness posture, risk register, and mitigation strategies.
+- [Executive Q&A](./PROJECT_QA_EXECUTIVE.md): Concise answers for leadership and stakeholder review.
+- [Executive Readiness Report](./CustomerAI_Executive_Readiness_Report.md): High-level summary and confidence statement for production deployment.
+- [Live Demo Script](./CustomerAI_Live_Demo_Script.md): Step-by-step guide and talking points for demonstrating CustomerAI to stakeholders.
+- [Executive Presentation Slides](./CustomerAI_Executive_Presentation.md): Slide content for executive briefings and board meetings.
+- [Documentation & Q&A Update Checklist](./PROJECT_DOC_UPDATE_CHECKLIST.md): Use this checklist to ensure all documentation, Q&A, and risk registers are kept up to date as the project evolves.
+
+## Recent Improvements
+
+- **Type System:** All high-priority type system issues have been addressed, including undefined names, circular imports, and type mismatches. See [docs/TYPE_SYSTEM_ISSUES.md](./docs/TYPE_SYSTEM_ISSUES.md) for details.
+- **Security:** Subprocess vulnerabilities have been fixed.
+- **Code Style:** Formatting and import sorting are being standardized across the codebase.
+- **Documentation:** All changes and fixes are now tracked in the issues documentation for transparency and team awareness.
+
 - [Quick Start Guide](#quick-start-guide)
 - [Cloud and Deployment Guide](#cloud-and-deployment-guide)
 - [Features](#features)
@@ -247,7 +316,7 @@ The MIT License applies only to the original code in this project, not to any th
 Get up and running with CustomerAI Insights Platform in minutes:
 
 ### 1. Prerequisites
-- Python 3.10 
+- Python 3.10
 - pip (Python package manager)
 - Git
 
@@ -359,7 +428,7 @@ The Docker Compose setup includes:
    ```bash
    # Configure AWS CLI
    aws configure
-   
+
    # Or set environment variables
    export AWS_ACCESS_KEY_ID=your-access-key
    export AWS_SECRET_ACCESS_KEY=your-secret-key
@@ -379,7 +448,7 @@ The Docker Compose setup includes:
    ```bash
    # Login with Azure CLI
    az login
-   
+
    # Set subscription
    az account set --subscription <subscription-id>
    ```
@@ -397,7 +466,7 @@ The Docker Compose setup includes:
    ```bash
    # Login with gcloud CLI
    gcloud auth login
-   
+
    # Set project
    gcloud config set project <project-id>
    ```
@@ -411,23 +480,26 @@ The Docker Compose setup includes:
 
 ### CI/CD Pipeline
 
-The project includes GitHub Actions workflows for continuous integration and deployment:
+The project uses a single GitHub Actions workflow for continuous integration and deployment:
 
 ```yaml
-# .github/workflows/ci.yml
-- test: Runs unit tests, linting, and type checking
-- security-scan: Performs security analysis
-- build: Builds Python package
-- docker: Builds and pushes Docker image
-- deploy-dev: Deploys to development environment
-- deploy-prod: Deploys to production environment
+# .github/workflows/ci-cd-merged.yml
+- test: Runs unit tests, linting, and type checking (Python 3.9 & 3.10)
+- security-scan: Performs static code and dependency vulnerability analysis
+- integration-test: Runs integration tests
+- build: Builds Python package and uploads artifacts
+- docker: Builds and pushes Docker image to DockerHub
+- deploy-dev: Deploys to development environment (on develop branch)
+- deploy-prod: Deploys to production environment (on main/master branch)
 ```
 
-To use the CI/CD pipeline:
+**How to use the CI/CD pipeline:**
 1. Fork the repository
 2. Enable GitHub Actions
-3. Set up required secrets in repository settings
-4. Push to `develop` branch for dev deployment or `main` for production
+3. Set up required secrets (e.g., `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`) in repository settings
+4. Push to `develop` branch for dev deployment or `main`/`master` for production deployment
+
+> The legacy workflows (`ci.yml`, `ci-cd.yml`) have been replaced by this unified workflow. All pipeline logic is now centralized for easier maintenance and clarity.
 
 ### Testing in Virtual Environments
 
@@ -555,7 +627,7 @@ except CloudError as e:
     print(f"Error category: {e.category.value}")
     print(f"Provider: {e.provider.value if e.provider else 'unknown'}")
     print(f"Error details: {e.details}")
-    
+
     # Log the error with custom level
     import logging
     e.log(level=logging.WARNING)
@@ -571,11 +643,11 @@ try:
 except ClientError as aws_error:
     # Convert to standardized error
     cloud_error = handle_cloud_error(aws_error, CloudProvider.AWS, "s3", "get_object")
-    
+
     # Now you can handle the standardized error
     print(f"Standardized error: {cloud_error.message}")
     print(f"Error category: {cloud_error.category.value}")
-    
+
     # Error details are preserved
     print(f"AWS error code: {cloud_error.error_code}")
 ```
@@ -655,9 +727,9 @@ def s3_connection_factory():
 
 # Use the pooled function
 result = upload_file(
-    bucket="my-bucket", 
-    key="my-key", 
-    data="my-data", 
+    bucket="my-bucket",
+    key="my-key",
+    data="my-data",
     connection_factory=s3_connection_factory
 )
 
@@ -705,7 +777,7 @@ Track and analyze the performance of cloud operations to identify bottlenecks an
 
 ```python
 from cloud.utils.metrics import (
-    track_performance, get_metrics_manager, 
+    track_performance, get_metrics_manager,
     record_metric, MetricType
 )
 from cloud.config import CloudProvider
@@ -727,7 +799,7 @@ def upload_file(bucket, key, data):
 def process_batch(items):
     start_time = time.time()
     success_count = 0
-    
+
     for item in items:
         try:
             # Process item
@@ -742,7 +814,7 @@ def process_batch(items):
                 metric_type=MetricType.ERROR_RATE,
                 value=1.0
             )
-    
+
     # Record batch throughput
     record_metric(
         provider=CloudProvider.AZURE,
@@ -751,7 +823,7 @@ def process_batch(items):
         metric_type=MetricType.THROUGHPUT,
         value=len(items) / (time.time() - start_time)
     )
-    
+
     # Record success rate
     record_metric(
         provider=CloudProvider.AZURE,
@@ -1014,10 +1086,10 @@ pool_manager.set_default_config(
    ```python
    # Network errors: More retries with exponential backoff
    @retry_with_backoff(max_attempts=5, backoff_strategy=BackoffStrategy.EXPONENTIAL)
-   
+
    # Rate limiting: Longer delays with exponential backoff
    @retry_with_backoff(max_attempts=3, base_delay=2.0, max_delay=60.0)
-   
+
    # Service errors: Circuit breaker to prevent cascading failures
    @retry_with_backoff(circuit_breaker=CircuitBreaker(failure_threshold=3))
    ```
@@ -1028,7 +1100,7 @@ pool_manager.set_default_config(
    @retry_with_backoff(max_attempts=3)
    def get_object(bucket, key):
        return storage_client.get_object(bucket=bucket, key=key)
-   
+
    # Careful with non-idempotent operations
    @retry_with_backoff(max_attempts=1)  # No retries by default
    def create_unique_resource(name, data):
@@ -1039,15 +1111,16 @@ pool_manager.set_default_config(
 
 1. **Size Pools Appropriately**: Match pool size to workload and resource constraints
    ```python
-   # High throughput service
-   pool_manager.get_pool(
+   # Formula: max_size = peak_concurrent_operations * (1 + buffer_factor)
+   # Example for a service handling 20 concurrent operations with 20% buffer:
+   pool = pool_manager.get_pool(
        provider=CloudProvider.AWS,
        service="dynamodb",
        factory=dynamodb_factory,
-       max_size=50,
-       min_size=10
+       max_size=20 * (1 + 0.2),  # 24 connections
+       min_size=5  # Keep 5 warm connections
    )
-   
+
    # Low volume service
    pool_manager.get_pool(
        provider=CloudProvider.AWS,
@@ -1067,7 +1140,7 @@ pool_manager.set_default_config(
        factory=payment_factory,
        block_timeout=2.0  # Wait max 2 seconds for a connection
    )
-   
+
    # Background operations - can wait longer
    pool_manager.get_pool(
        provider=CloudProvider.AWS,
@@ -1104,7 +1177,7 @@ pool_manager.set_default_config(
    connection = pool.acquire()
    # Long processing...
    pool.release(connection)
-   
+
    # Better:
    connection = pool.acquire()
    data = connection.get_data()  # Get what you need quickly
@@ -1145,7 +1218,7 @@ pool_manager.set_default_config(
        failure_threshold=5,
        recovery_timeout=30.0,
    )
-   
+
    @retry_with_backoff(circuit_breaker=circuit_breaker)
    def call_service():
        # Implementation
@@ -1192,11 +1265,11 @@ pool_manager.set_default_config(
 - **Credential Management**: Never hardcode credentials
   ```python
   # BAD
-  client = boto3.client('s3', 
+  client = boto3.client('s3',
       aws_access_key_id='AKIAXXXXXXXXXXXXXXXX',
       aws_secret_access_key='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
   )
-  
+
   # GOOD
   # Use environment variables, IAM roles, or secure credential stores
   client = boto3.client('s3')  # Uses credentials from environment or instance profile
@@ -1245,10 +1318,10 @@ pool_manager.set_default_config(
       # Validate input
       if not isinstance(user_id, str) or not user_id.isalnum():
           raise ValueError("Invalid user ID format")
-      
+
       # Sanitize data
       sanitized_data = sanitize_user_data(data)
-      
+
       # Store data
       return db_client.put_item(
           TableName="users",
@@ -1271,6 +1344,15 @@ pool_manager.set_default_config(
       max_size=20 * (1 + 0.2),  # 24 connections
       min_size=5  # Keep 5 warm connections
   )
+
+  # Low volume service
+  pool_manager.get_pool(
+      provider=CloudProvider.AWS,
+      service="sns",
+      factory=sns_factory,
+      max_size=5,
+      min_size=1
+  )
   ```
 
 - **Connection Lifecycle**: Tune connection recycling parameters
@@ -1292,13 +1374,13 @@ pool_manager.set_default_config(
   # Instead of multiple single operations:
   for item in items:
       db_client.put_item(TableName="table", Item=item)  # Inefficient
-  
+
   # Use batch operations:
   @connection_pooled(provider=CloudProvider.AWS, service="dynamodb")
   def batch_write_items(items, connection_factory=None, connection=None):
       # Prepare batch request
       batch_items = {"table": [{"PutRequest": {"Item": item}} for item in items]}
-      
+
       # Execute batch operation
       connection.batch_write_item(RequestItems=batch_items)
   ```
@@ -1315,7 +1397,7 @@ pool_manager.set_default_config(
       metric_type=MetricType.THROUGHPUT,
       value=files_processed_per_second
   )
-  
+
   # Custom metric for data volume
   record_metric(
       provider=CloudProvider.AWS,
@@ -1334,6 +1416,38 @@ Contributions are welcome! Please check out our [contribution guidelines](CONTRI
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
+
+## Local Testing: Demo/Test Secrets
+
+To ensure security and compliance, demo/test secrets are not tracked in the repository. If you need to run the application or tests locally with demo secrets, add them to your own untracked files as follows:
+
+### .env (or env.example)
+```
+REVIEW_DASHBOARD_DEMO=demo_dashboard_value
+```
+
+### CONFIGURATION.md (or your config file)
+```
+"DEMO_JWT_SECRET": "demo_value",
+```
+
+### Shell/Environment
+```
+export DEMO_OPENAI_API_KEY=demo_value
+```
+
+### Python Test (test_e2e.py)
+```
+test_data = {
+    "test": "data",
+    "demo_secret": "demo_value",
+    "demo_password": "demo_value",
+}
+```
+
+> **Note:** Never commit demo/test secrets to the repository. Only add them to your local, untracked files for development and testing purposes.
+
 The MIT License applies only to the original code in this project, not to any third-party dependencies. See [DEPENDENCIES.md](DEPENDENCIES.md) for details on third-party components and their licenses.
 
 ## Author
@@ -1349,14 +1463,14 @@ The MIT License applies only to the original code in this project, not to any th
 
 ### Key Technologies
 
-- **Python 3.12**: Latest stable Python version with improved performance and features
+- **Python 3.10**: Latest stable Python version with improved performance and features
 - **Modern AI & ML Stack**:
   - **JAX**: High-performance numerical computing with automatic differentiation
   - **Ray**: Distributed computing framework for scaling AI/ML workloads
   - **MLflow**: Platform for managing ML lifecycle including tracking, deployment
   - **Hugging Face Transformers**: State-of-the-art NLP models and tools
   - **DeepSpeed**: Optimization library for large-scale model training
-- **Kubernetes Integration**: 
+- **Kubernetes Integration**:
   - Native deployment on Kubernetes clusters
   - Kubeflow Pipelines for ML workflows
   - Seldon Core for model serving

@@ -33,7 +33,7 @@ The platform supports the following cloud database services:
 ### AWS DynamoDB
 
 - **Type**: NoSQL, key-value and document database
-- **Strengths**: 
+- **Strengths**:
   - Seamless scalability
   - Single-digit millisecond latency
   - Fully managed with auto-scaling
@@ -164,8 +164,8 @@ customer = db_client.get_item("customers", key)
 
 # Use projection to retrieve specific attributes
 customer_name = db_client.get_item(
-    "customers", 
-    key, 
+    "customers",
+    key,
     projection_expression="name,email"
 )
 ```
@@ -184,9 +184,9 @@ result = db_client.update_item("customers", key, updates)
 
 # Conditional update (only if condition is met)
 result = db_client.update_item(
-    "customers", 
-    key, 
-    updates, 
+    "customers",
+    key,
+    updates,
     condition_expression="subscription_tier = :tier",
     expression_attribute_values={":tier": "premium"}
 )
@@ -201,8 +201,8 @@ result = db_client.delete_item("customers", key)
 
 # Conditional delete
 result = db_client.delete_item(
-    "customers", 
-    key, 
+    "customers",
+    key,
     condition_expression="subscription_tier = :tier",
     expression_attribute_values={":tier": "basic"}
 )
@@ -233,8 +233,8 @@ items = db_client.query_items("customers", query)
 
 # Query with limit and pagination
 items = db_client.query_items(
-    "customers", 
-    query, 
+    "customers",
+    query,
     limit=10,
     paginate=True
 )
@@ -274,7 +274,7 @@ events = db_client.query_items("events", unprocessed_query, limit=100)
 for event in events:
     # Process event
     process_event(event)
-    
+
     # Mark as processed
     db_client.update_item(
         "events",
@@ -292,58 +292,58 @@ class CustomerRepository:
     def __init__(self, db_client):
         self.db_client = db_client
         self.table_name = "customers"
-    
+
     def create(self, customer):
         # Add required fields
         if "id" not in customer:
             customer["id"] = str(uuid.uuid4())
         if "created_at" not in customer:
             customer["created_at"] = datetime.now().isoformat()
-            
+
         return self.db_client.create_item(self.table_name, customer)
-    
+
     def get_by_id(self, customer_id):
         # Find customer by ID across all created_at values
         query = {
             "key_condition_expression": "id = :id",
             "expression_attribute_values": {":id": customer_id}
         }
-        
+
         items = self.db_client.query_items(self.table_name, query, limit=1)
         return items[0] if items else None
-    
+
     def update(self, customer_id, updates):
         # Get customer to find the created_at value
         customer = self.get_by_id(customer_id)
         if not customer:
             return {"success": False, "error": "Customer not found"}
-            
+
         # Update with timestamp
         updates["last_updated"] = datetime.now().isoformat()
-        
+
         return self.db_client.update_item(
             self.table_name,
             {"id": customer_id, "created_at": customer["created_at"]},
             updates
         )
-    
+
     def delete(self, customer_id):
         # Get customer to find the created_at value
         customer = self.get_by_id(customer_id)
         if not customer:
             return {"success": False, "error": "Customer not found"}
-            
+
         return self.db_client.delete_item(
             self.table_name,
             {"id": customer_id, "created_at": customer["created_at"]}
         )
-    
+
     def find_by_subscription_tier(self, tier):
         query = {
             "filter_expression": "subscription_tier = :tier",
             "expression_attribute_values": {":tier": tier}
         }
-        
+
         return self.db_client.query_items(self.table_name, query)
 ```
 
@@ -459,7 +459,7 @@ Follow the principle of least privilege:
    # In .env.production
    AWS_ACCESS_KEY_ID=production-key
    AWS_SECRET_ACCESS_KEY=production-secret
-   
+
    # In .env.development
    AWS_ACCESS_KEY_ID=development-key
    AWS_SECRET_ACCESS_KEY=development-secret
@@ -470,7 +470,7 @@ Follow the principle of least privilege:
 1. **Anonymization**: Use the built-in anonymization for PII before storage
    ```python
    from privacy.anonymizer import DataAnonymizer
-   
+
    anonymizer = DataAnonymizer()
    customer_data = {
        "name": "John Smith",
@@ -480,10 +480,10 @@ Follow the principle of least privilege:
            "marketing_emails": True
        }
    }
-   
+
    # Anonymize PII
    anonymized = anonymizer.anonymize_data(customer_data)
-   
+
    # Store anonymized data
    db_client.create_item("customers", anonymized)
    ```
@@ -491,7 +491,7 @@ Follow the principle of least privilege:
 2. **Field-Level Encryption**: Encrypt sensitive fields before storage
    ```python
    from src.utils.security import encrypt_field
-   
+
    customer_data["ssn"] = encrypt_field(customer_data["ssn"])
    db_client.create_item("customers", customer_data)
    ```
@@ -504,7 +504,7 @@ Follow the principle of least privilege:
    ```
    ERROR: Access denied when connecting to cloud provider
    ```
-   
+
    **Solutions:**
    - Verify credentials in `.env` file
    - Check IAM permissions
@@ -515,7 +515,7 @@ Follow the principle of least privilege:
    ```
    ERROR: Table/collection not found
    ```
-   
+
    **Solutions:**
    - Verify table/collection name
    - Check if table exists: `db_client.table_exists("table_name")`
@@ -526,7 +526,7 @@ Follow the principle of least privilege:
    ```
    WARNING: Slow query detected
    ```
-   
+
    **Solutions:**
    - Review index strategy
    - Optimize query conditions
@@ -670,9 +670,9 @@ page1 = db_client.query_items("customers", query, limit=100)
 # If there are more results, get the next page
 if page1.get("last_evaluated_key"):
     page2 = db_client.query_items(
-        "customers", 
-        query, 
+        "customers",
+        query,
         limit=100,
         exclusive_start_key=page1["last_evaluated_key"]
     )
-``` 
+```

@@ -7,4 +7,4 @@ such as AWS S3, Azure Blob Storage, and Google Cloud Storage.
 
 from cloud.storage.base import CloudStorageClient
 
-__all__ = ['CloudStorageClient'] 
+__all__ = ["CloudStorageClient"]

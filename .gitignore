@@ -89,4 +89,4 @@ docs/_templates/
 .pytest_cache/
 
 # mypy
-.mypy_cache/ 
+.mypy_cache/

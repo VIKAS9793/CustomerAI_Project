@@ -1,0 +1,4 @@
+[tool.bandit]
+# Minimal configuration for Bandit
+exclude_dirs = ["tests", "examples"]
+skips = ["B101"]

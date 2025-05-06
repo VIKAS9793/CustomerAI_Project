@@ -37,7 +37,7 @@ Our enhanced fairness framework implements industry-leading practices for bias d
 - **Temporal Monitoring**: Tracking fairness metrics over time
 
 #### Automated Mitigation Strategies
-- **Pre-processing Techniques**: 
+- **Pre-processing Techniques**:
   - Sample reweighting to balance outcomes across protected groups
   - Balanced dataset creation through stratified resampling
   - Feature transformation to reduce protected attribute correlation
@@ -132,4 +132,4 @@ Following financial industry standards from JP Morgan's AI/ML risk framework:
 - Google Responsible AI: https://ai.google/responsibilities/responsible-ai-practices/
 - IBM AI Ethics: https://www.ibm.com/artificial-intelligence/ethics
 - Federal Reserve SR 11-7: https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm
-- Model Cards: https://modelcards.withgoogle.com/about 
+- Model Cards: https://modelcards.withgoogle.com/about

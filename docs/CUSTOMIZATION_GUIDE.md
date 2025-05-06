@@ -98,9 +98,9 @@ You can customize which bias mitigation strategies are available and their defau
   "mitigation": {
     "default_strategy": "reweighing",
     "available_strategies": [
-      "reweighing", 
-      "disparate_impact_remover", 
-      "equalized_odds", 
+      "reweighing",
+      "disparate_impact_remover",
+      "equalized_odds",
       "calibrated_equalized_odds",
       "reject_option_classification",
       "balanced_sampling"
@@ -235,7 +235,7 @@ class CustomBiasDetector(BiasDetector):
         super().__init__(config)
         # Add your custom metric to the list of metrics
         self.metrics.append('my_custom_metric')
-    
+
     def calculate_my_custom_metric(self, group1_data, group2_data):
         # Implement your custom metric calculation
         # ...

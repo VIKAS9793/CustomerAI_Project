@@ -73,7 +73,7 @@ def custom_statistical_test(group1_data, group2_data):
     # Example: Use Mann-Whitney U test for non-parametric data
     u_stat, p_value = stats.mannwhitneyu(group1_data, group2_data)
     return p_value
-    
+
 # Update BiasDetector._calculate_significance method
 def _calculate_significance(self, rate1, rate2, n1, n2):
     # Use your custom statistical test
@@ -107,16 +107,16 @@ def create_adversarial_model(input_dim, output_dim, protected_dim):
     predictor_input = tf.keras.Input(shape=(input_dim,))
     predictor_hidden = tf.keras.layers.Dense(64, activation='relu')(predictor_input)
     predictor_output = tf.keras.layers.Dense(output_dim, activation='sigmoid')(predictor_hidden)
-    
+
     # Create adversary model
     adversary_input = tf.keras.layers.concatenate([predictor_hidden, predictor_output])
     adversary_hidden = tf.keras.layers.Dense(32, activation='relu')(adversary_input)
     adversary_output = tf.keras.layers.Dense(protected_dim, activation='softmax')(adversary_hidden)
-    
+
     # Create combined model
     predictor_model = tf.keras.Model(inputs=predictor_input, outputs=predictor_output)
     adversary_model = tf.keras.Model(inputs=[predictor_hidden, predictor_output], outputs=adversary_output)
-    
+
     return predictor_model, adversary_model
 
 # Update FairnessMitigation.adversarial_debiasing method
@@ -125,17 +125,17 @@ def adversarial_debiasing(self, data, protected_attribute, features, outcome_col
     X = data[features].values
     y = data[outcome_column].values
     protected = data[protected_attribute].values
-    
+
     # Create models
     predictor_model, adversary_model = create_adversarial_model(
         input_dim=len(features),
         output_dim=1,
         protected_dim=len(np.unique(protected))
     )
-    
+
     # Implement training loop with adversarial loss
     # ...
-    
+
     return {
         'model': predictor_model,
         'metrics': {
@@ -163,11 +163,11 @@ def train_with_weights(X, y, sample_weights):
 def reweigh_samples(self, data, protected_attribute, outcome_column, ...):
     # Calculate weights
     weights = self._calculate_weights(data, protected_attribute, outcome_column)
-    
+
     # Return weighted data
     data_with_weights = data.copy()
     data_with_weights['sample_weight'] = weights
-    
+
     return data_with_weights, weights
 ```
 
@@ -185,20 +185,20 @@ class FairnessAwareTrainer:
     def __init__(self, fairness_mitigation):
         self.fairness_mitigation = fairness_mitigation
         self.model_trainer = ModelTrainer()
-        
+
     def train(self, data, protected_attributes, features, outcome):
         # Apply fairness mitigation
         reweighted_data, weights = self.fairness_mitigation.reweigh_samples(
             data, protected_attributes[0], outcome
         )
-        
+
         # Train model with weights
         model = self.model_trainer.train(
             reweighted_data[features],
             reweighted_data[outcome],
             sample_weights=weights
         )
-        
+
         return model
 ```
 
@@ -274,12 +274,12 @@ async def detect_bias(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Rate limit exceeded"
         )
-    
+
     # Process request
     try:
         # Convert data to DataFrame
         df = pd.DataFrame(data['data'])
-        
+
         # Run bias detection
         bias_detector = BiasDetector()
         results = bias_detector.detect_outcome_bias(
@@ -287,7 +287,7 @@ async def detect_bias(
             attributes=data['protected_attributes'],
             outcome_columns=data['outcome_columns']
         )
-        
+
         return results
     except Exception as e:
         raise HTTPException(
@@ -325,14 +325,14 @@ class Query:
 class Mutation:
     @strawberry.mutation
     async def detect_bias(
-        self, 
-        data: List[Dict], 
+        self,
+        data: List[Dict],
         protected_attributes: List[str],
         outcome_columns: List[str]
     ) -> List[BiasDetectionResult]:
         # Convert data to DataFrame
         df = pd.DataFrame(data)
-        
+
         # Run bias detection
         bias_detector = BiasDetector()
         results = bias_detector.detect_outcome_bias(
@@ -340,7 +340,7 @@ class Mutation:
             attributes=protected_attributes,
             outcome_columns=outcome_columns
         )
-        
+
         # Convert results to GraphQL type
         return [
             BiasDetectionResult(
@@ -393,13 +393,13 @@ def detect_outcome_bias(self, data, attributes, outcome_columns, ...):
         with BIAS_DETECTION_DURATION.labels(attribute=attribute).time():
             # Existing bias detection code
             # ...
-            
+
             # Record metrics
             BIAS_DETECTION_REQUESTS.labels(
                 status='success',
                 attribute=attribute
             ).inc()
-            
+
             if bias_detected:
                 BIAS_DETECTED.labels(
                     attribute=attribute,
@@ -426,10 +426,10 @@ def detect_outcome_bias(self, data, attributes, outcome_columns, ...):
         attributes=attributes,
         outcomes=outcome_columns
     )
-    
+
     # Existing bias detection code
     # ...
-    
+
     logger.info(
         "bias_detection_complete",
         bias_detected=results['summary']['bias_detected'],
@@ -461,20 +461,20 @@ def test_bias_detection_with_real_data(real_loan_data):
         'significance_level': 0.01,
         'fairness_threshold': 0.85
     })
-    
+
     # Run bias detection
     results = bias_detector.detect_outcome_bias(
         real_loan_data,
         attributes=['gender', 'race', 'age_group'],
         outcome_columns=['loan_approved']
     )
-    
+
     # Validate results against expected outcomes for this dataset
     assert 'summary' in results
     assert 'bias_detected' in results['summary']
-    
+
     # Check specific metrics based on known characteristics of the dataset
-    gender_findings = [f for f in results['summary'].get('significant_findings', []) 
+    gender_findings = [f for f in results['summary'].get('significant_findings', [])
                       if f['attribute'] == 'gender']
     assert len(gender_findings) > 0
 ```
@@ -509,7 +509,7 @@ def test_adversarial_debiasing_with_real_tf(real_loan_data, real_model_factory):
             }
         }
     })
-    
+
     # Run adversarial debiasing
     result = fairness_mitigation.adversarial_debiasing(
         data=real_loan_data,
@@ -519,7 +519,7 @@ def test_adversarial_debiasing_with_real_tf(real_loan_data, real_model_factory):
         model_factory=real_model_factory,
         epochs=5  # Small number for testing
     )
-    
+
     # Validate result
     assert 'model' in result
     assert 'metrics' in result

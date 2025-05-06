@@ -6,4 +6,4 @@ This package contains various utility functions and classes used throughout the 
 
 from src.utils.date_provider import DateProvider
 
-__all__ = ['DateProvider']
+__all__ = ["DateProvider"]

@@ -87,7 +87,7 @@ This document provides solutions to common issues you might encounter while sett
 2. Check token payload for correct role claims:
    ```python
    import jwt
-   
+
    token = "your.jwt.token"
    # Use the same secret key used for token generation
    payload = jwt.decode(token, "your-secret-key", algorithms=["HS256"])
@@ -135,7 +135,7 @@ This document provides solutions to common issues you might encounter while sett
 3. Implement retry logic with exponential backoff:
    ```python
    from tenacity import retry, stop_after_attempt, wait_exponential
-   
+
    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
    def generate_response_with_retry(query):
        # Your API call here
@@ -196,7 +196,7 @@ This document provides solutions to common issues you might encounter while sett
    # SQLite
    rm customerai_dev.db
    python -m scripts.init_db
-   
+
    # PostgreSQL
    psql -U postgres -c "DROP DATABASE customerai; CREATE DATABASE customerai;"
    alembic upgrade head
@@ -430,7 +430,7 @@ If you're still experiencing issues after trying these solutions, please:
    from opentelemetry.sdk.trace import TracerProvider
    from opentelemetry.sdk.trace.export import BatchSpanProcessor
    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-   
+
    provider = TracerProvider()
    processor = BatchSpanProcessor(OTLPSpanExporter())
    provider.add_span_processor(processor)
@@ -449,4 +449,4 @@ If you're still experiencing issues after trying these solutions, please:
    curl http://localhost:8000/metrics
    ```
 3. Ensure metric names follow Prometheus naming conventions
-4. Check Prometheus UI at http://localhost:9090 for target status 
+4. Check Prometheus UI at http://localhost:9090 for target status

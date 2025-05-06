@@ -1,6 +1,30 @@
 # CustomerAI Fairness Framework Documentation
 
-This document provides an overview of all documentation resources available for the CustomerAI Fairness Framework, including implementation guides, customization options, and integration instructions.
+Last Updated: May 6, 2025
+
+This document provides comprehensive documentation for the CustomerAI Fairness Framework, a Python 3.10-based system for ensuring AI fairness and bias mitigation in customer analytics.
+
+## Framework Overview
+
+```python
+from src.fairness import BiasDetector, FairnessMitigation
+from src.fairness.types import FairnessConfig, FairnessMetrics
+
+# Initialize with configuration
+config = FairnessConfig.load()
+detector = BiasDetector(config)
+
+# Analyze for bias
+metrics: FairnessMetrics = detector.analyze(data)
+```
+
+## Key Features
+
+- Comprehensive bias detection across multiple metrics
+- Industry-specific fairness configurations
+- Memory-efficient processing with pagination
+- Real-time monitoring and alerting
+- Human-in-the-loop review integration
 
 ## Documentation Resources
 

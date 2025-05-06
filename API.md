@@ -23,7 +23,7 @@ Authenticates a user and returns a JWT token.
 ```json
 {
   "username": "user@example.com",
-  "password": "secure_password"
+  "password": "secure_password" # pragma: allowlist secret
 }
 ```
 
@@ -33,7 +33,7 @@ Authenticates a user and returns a JWT token.
   "error": false,
   "status_code": 200,
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." # pragma: allowlist secret,
     "user_id": "123",
     "roles": ["analyst"]
   },
@@ -155,7 +155,7 @@ Generates AI-powered responses for customer queries.
     "requires_human_review": false,
     "confidence": 0.87,
     "alternative_responses": [
-      "Thank you for your interest in a personal loan. With a credit score of 650, you may qualify for our standard personal loan options..."
+      "Thank you for your interest in a personal loan. With a credit score of 650, you may qualify for our standard personal loan options."
     ]
   },
   "timestamp": "2023-08-15T14:27:33.123456"
@@ -185,8 +185,8 @@ Anonymizes personally identifiable information (PII) in text.
     "anonymized_text": "Hi, my name is [NAME_1] and my account number is [ACCOUNT_NUMBER_1]. My phone number is [PHONE_1].",
     "mapping": {
       "[NAME_1]": "John Smith",
-      "[ACCOUNT_NUMBER_1]": "1234567890",
-      "[PHONE_1]": "555-123-4567"
+      "[ACCOUNT_NUMBER_1]": "XXXXXX7890",
+      "[PHONE_1]": "XXX-XXX-4567"
     },
     "pii_detected": ["name", "account_number", "phone_number"]
   },
@@ -687,6 +687,6 @@ Real-time updates are available through WebSocket connections at:
 ## API Client Libraries
 
 Official client libraries are available for:
-- Python: `pip install customerai-client`
-- JavaScript: `npm install customerai-client`
-- Java: Available as Maven dependency 
+- Python 3.10: `pip install customerai-insights-client`
+- JavaScript: `npm install @customerai/insights-client`
+- Java: Available as Maven dependency

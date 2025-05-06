@@ -1,0 +1,36 @@
+# CustomerAI Project Configuration
+
+app:
+  name: "CustomerAI"
+  version: "1.3.0"
+  environment: "development"
+
+database:
+  type: "dynamodb"
+  region: "us-west-2"
+  table_prefix: "customerai_"
+
+monitoring:
+  prometheus:
+    enabled: true
+    port: 9090
+  logging:
+    level: "INFO"
+    format: "json"
+
+ai:
+  models:
+    - name: "gpt-4"
+      provider: "openai"
+      max_tokens: 2048
+    - name: "claude-2"
+      provider: "anthropic"
+      max_tokens: 4096
+
+security:
+  encryption:
+    enabled: true
+    key_rotation_days: 30
+  compliance:
+    gdpr_enabled: true
+    ccpa_enabled: true

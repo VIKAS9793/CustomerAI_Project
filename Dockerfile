@@ -45,7 +45,10 @@ ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    UMASK=077 \
+    CORS_ORIGINS="https://yourdomain.com" \
+    API_RATE_LIMIT=100
 
 # Install system dependencies including those for onnxruntime-gpu
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -59,6 +62,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # For Redis
     redis-tools \
     # For security
+    && rm -rf /var/lib/apt/lists/* \
+    # Remove build tools for smaller image and security
+    && apt-get purge -y build-essential gcc git curl \
+    && apt-get autoremove -y \
+    && apt-get clean
+
+# Create and use a non-root user
+RUN adduser --disabled-password --gecos "" app
+USER app
+
+# Set working directory
+WORKDIR /app
+
+# Copy application files
+COPY --chown=app:app --from=builder /app /app
+
+# Set root filesystem to read-only for extra security
+VOLUME /tmp
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
     ca-certificates \
     # For node-based frontends
     curl \
@@ -167,4 +191,4 @@ ENV CUDA_VISIBLE_DEVICES=0
 # EXPOSE 8000
 # ENTRYPOINT ["/usr/bin/tini", "--", "/app/docker-entrypoint.sh"]
 # CMD ["api"]
-# ----------------------------------------------------------------- 
+# -----------------------------------------------------------------

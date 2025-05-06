@@ -113,4 +113,4 @@ When using this project with cloud provider SDKs:
 
 The copyright and license notices included in the CustomerAI Insights Platform source files apply ONLY to the original code written by the authors of this project, and NOT to any third-party components or dependencies.
 
-If you believe any copyright or license information is incorrect or missing, please contact the project owner. 
+If you believe any copyright or license information is incorrect or missing, please contact the project owner.

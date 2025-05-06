@@ -56,33 +56,22 @@ Please follow these steps to have your contribution considered by the maintainer
 **What if the status checks are failing?**
 If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment explaining why you believe the failure is unrelated.
 
+# Contributing to CustomerAI Project
+
 ## Development Setup
 
-This section will help you set up a development environment.
+1. Prerequisites
+   - Python 3.10 or higher
+   - Docker
+   - Git
 
-### Prerequisites
-
-* Python 3.9+
-* pip
-* Git
-* Docker (optional, for containerized development)
-
-### Local Development
-
-1. Fork the repository on GitHub
-2. Clone your fork locally:
-    ```
-    git clone https://github.com/your-username/customerai-insights.git
-    cd customerai-insights
-    ```
-
-3. Create a virtual environment and install dependencies:
-    ```
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt  # Development dependencies
-    ```
+2. Environment Setup
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt  # Development dependencies
+   ```
 
 4. Set up pre-commit hooks:
     ```
@@ -169,6 +158,8 @@ This section will help you set up a development environment.
 * Use descriptive test function names (test_what_it_does_when_condition)
 * Write both unit tests and integration tests
 
+# Contributing to CustomerAI Project
+
 ## Project Structure
 
 ```
@@ -214,4 +205,4 @@ If you need help with contributing, please:
 
 ## Attribution
 
-This Contributing Guide is adapted from the [Atom Contributing Guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) and the [Rails Contributing Guide](https://github.com/rails/rails/blob/main/CONTRIBUTING.md). 
+This Contributing Guide is adapted from the [Atom Contributing Guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) and the [Rails Contributing Guide](https://github.com/rails/rails/blob/main/CONTRIBUTING.md).

@@ -6,19 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}CustomerAI Insights Platform{% endblock %}</title>
     <meta name="description" content="Financial services AI platform for customer insights and personalized recommendations">
-    
+
     <!-- Security headers -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
     <meta name="referrer" content="no-referrer">
-    
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/components.css">
     {% block styles %}{% endblock %}
-    
+
     <!-- Device security script - must load early -->
     <script src="/static/js/device_security.js"></script>
 </head>
@@ -45,11 +45,11 @@
             </div>
         </nav>
     </header>
-    
+
     <main>
         {% block content %}{% endblock %}
     </main>
-    
+
     <footer>
         <div class="footer-content">
             <div class="footer-section">
@@ -75,10 +75,10 @@
             <p>&copy; {% now 'Y' %} CustomerAI. All rights reserved.</p>
         </div>
     </footer>
-    
+
     <!-- Main JavaScript -->
     <script src="/static/js/main.js"></script>
-    
+
     <!-- Apply security measures to all API requests -->
     <script>
         // Setup security for API requests
@@ -92,11 +92,11 @@
                 }
                 return originalFetch.apply(this, arguments);
             };
-            
+
             console.log('Security measures applied to API requests');
         });
     </script>
-    
+
     {% block scripts %}{% endblock %}
 </body>
-</html> 
+</html>
