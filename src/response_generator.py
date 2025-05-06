@@ -338,7 +338,7 @@ class ResponseGenerator:
                 "alternative_responses": [],
             }
 
-    def generate_response(self, query: str, context: Dict = None) -> Dict[str, Any]:
+    def generate_response(self, query: str, context: Optional[Dict] = None) -> Dict[str, Any]:
         """
         Generate a response for the given customer query.
 

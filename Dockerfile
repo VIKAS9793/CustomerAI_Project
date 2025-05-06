@@ -80,9 +80,18 @@ COPY --chown=app:app --from=builder /app /app
 
 # Set root filesystem to read-only for extra security
 VOLUME /tmp
+VOLUME /var/log/customerai
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+# Create logging directory and set permissions
+RUN mkdir -p /var/log/customerai && \
+    chown app:app /var/log/customerai
+
+# Set logging environment variables
+ENV LOG_FILE=/var/log/customerai/app.log \
+    LOG_LEVEL=INFO
+
+# Create logging configuration file
+RUN echo "[loggers]\nkeys=root\n\n[handlers]\nkeys=console,file\n\n[formatters]\nkeys=simple\n\n[logger_root]\nlevel=INFO\nhandlers=console,file\n\n[handler_console]\nclass=StreamHandler\nlevel=INFO\nformatter=simple\n\n[handler_file]\nclass=FileHandler\nlevel=INFO\nformatter=simple\nargs=(\"$(LOG_FILE)\", \"a\")\n\n[formatter_simple]\nformat=%(asctime)s - %(name)s - %(levelname)s - %(message)s" > /app/logging.conf
     ca-certificates \
     # For node-based frontends
     curl \
@@ -154,14 +163,27 @@ USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg2 \
+    ca-certificates \
+    curl \
+    postgresql-client \
+    redis-tools \
+    netcat \
+    strace \
+    lsof \
+    htop \
+    certbot \
+    dnsutils \
+    xfsprogs \
+    iputils-ping \
     && wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.0-1_all.deb \
     && dpkg -i cuda-keyring_1.0-1_all.deb \
     && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        cuda-minimal-build-11-8 \
-        libcudnn8 \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm cuda-keyring_1.0-1_all.deb
+    && rm -rf /var/lib/apt/lists/*
+
+USER app
+
+# Set environment variables for GPU use
+ENV CUDA_VISIBLE_DEVICES=0
 
 # Install GPU-enabled packages
 RUN pip install --no-cache-dir \
@@ -172,9 +194,6 @@ RUN pip install --no-cache-dir \
 
 # Switch back to app user
 USER app
-
-# Set environment variables for GPU use
-ENV CUDA_VISIBLE_DEVICES=0
 
 # -------------------- GPU SUPPORT (Optional) --------------------
 # FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04 AS gpu-runtime

@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Tuple
 
+from .secure_subprocess import SecureSubprocess
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -28,29 +30,38 @@ class ProjectAnalyzer:
         """Get recent git activity and changes."""
         try:
             # Get last commit date
-            last_commit = (
-                subprocess.check_output(
-                    ["git", "log", "-1", "--format=%cd", "--date=iso"], cwd=self.project_root
+            try:
+                result = SecureSubprocess.run(
+                    ["git", "log", "-1", "--format=%cd", "--date=iso"],
+                    cwd=str(self.project_root),
+                    capture_output=True,
                 )
-                .decode()
-                .strip()
-            )
+                last_commit = result.stdout.decode().strip()
+            except Exception as e:
+                logger.error(f"Error getting last commit: {e}")
+                last_commit = "Unknown"
 
             # Get recent changes
-            recent_changes = (
-                subprocess.check_output(
-                    ["git", "log", "-10", "--pretty=format:%s"], cwd=self.project_root
+            try:
+                result = SecureSubprocess.run(
+                    ["git", "log", "-10", "--pretty=format:%s"],
+                    cwd=str(self.project_root),
+                    capture_output=True,
                 )
-                .decode()
-                .split("\n")
-            )
+                recent_changes = result.stdout.decode().split("\n")
+            except Exception as e:
+                logger.error(f"Error getting recent changes: {e}")
+                recent_changes = []
 
             # Get modified files
-            modified_files = (
-                subprocess.check_output(["git", "diff", "--name-only"], cwd=self.project_root)
-                .decode()
-                .split("\n")
-            )
+            try:
+                result = SecureSubprocess.run(
+                    ["git", "diff", "--name-only"], cwd=str(self.project_root), capture_output=True
+                )
+                modified_files = result.stdout.decode().split("\n")
+            except Exception as e:
+                logger.error(f"Error getting modified files: {e}")
+                modified_files = []
 
             return {
                 "last_commit": last_commit,
@@ -77,11 +88,16 @@ class ProjectAnalyzer:
         """Get test coverage information."""
         try:
             # Run pytest with coverage
-            subprocess.run(
-                ["pytest", "--cov=src", "--cov-report=json"],
-                cwd=self.project_root,
-                capture_output=True,
-            )
+            try:
+                SecureSubprocess.run(
+                    ["pytest", "--cov=src", "--cov-report=json"],
+                    cwd=str(self.project_root),
+                    capture_output=True,
+                    check=True,
+                    timeout=300,  # 5 minute timeout for tests
+                )
+            except Exception as e:
+                logger.error(f"Error running tests: {e}")
 
             # Read coverage data
             coverage_file = self.project_root / ".coverage.json"
@@ -98,19 +114,23 @@ class ProjectAnalyzer:
         """Analyze code quality metrics."""
         try:
             # Run flake8 for code quality and capture output
-            subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "flake8",
-                    "--statistics",
-                    "--tee",
-                    "--output-file=flake8.txt",
-                ],
-                cwd=self.project_root,
-                capture_output=True,
-                check=True,
-            )
+            try:
+                SecureSubprocess.run(
+                    [
+                        "python",
+                        "-m",
+                        "flake8",
+                        "--statistics",
+                        "--tee",
+                        "--output-file=flake8.txt",
+                    ],
+                    cwd=str(self.project_root),
+                    capture_output=True,
+                    check=True,
+                    timeout=300,  # 5 minute timeout for flake8
+                )
+            except Exception as e:
+                logger.error(f"Error running flake8: {e}")
 
             # Parse flake8 output
             issues = {"errors": 0, "warnings": 0, "style": 0}

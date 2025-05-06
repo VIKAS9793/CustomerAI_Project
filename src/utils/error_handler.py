@@ -1,6 +1,6 @@
 import functools
 from datetime import datetime
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from src.utils.logger import get_logger
 
@@ -11,7 +11,7 @@ logger = get_logger("error_handler", log_file="logs/errors.log")
 class APIError(Exception):
     """Base exception for API errors"""
 
-    def __init__(self, message: str, status_code: int = 500, details: Any = None):
+    def __init__(self, message: str, status_code: int = 500, details: Optional[Any] = None):
         self.message = message
         self.status_code = status_code
         self.details = details

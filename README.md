@@ -116,6 +116,62 @@ The CustomerAI Insights Platform is designed for multiple industries:
 ## Getting Started
 
 ### Prerequisites
+
+- Python 3.10 or higher
+- Docker and Docker Compose (for production)
+- Git
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/VIKAS9793/CustomerAI_Project.git
+cd CustomerAI_Project
+```
+
+2. Create a virtual environment and install dependencies:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### Running Tests
+
+To run the test suite:
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run tests with coverage
+pytest --cov=src
+
+# Run security checks
+safety check
+pip-audit
+```
+
+### Contributing Securely
+
+1. Fork the repository
+2. Create a feature branch
+3. Run tests and security checks
+4. Submit a pull request
+5. Security review will be performed
+
+### Security
+
+For security-related issues, please contact security@customerai.com.
+
+See [SECURITY.md](SECURITY.md) for more details.
+
+### Prerequisites
 - Python 3.10
 - Docker and Docker Compose
 - AWS, Azure, or GCP account (depending on deployment target)
@@ -396,6 +452,12 @@ Visit http://localhost:8000 in your browser.
 ## Cloud and Deployment Guide
 
 This section provides instructions for deploying the CustomerAI Insights Platform to various environments for testing, development, and production.
+
+[![CI Status](https://github.com/VIKAS9793/CustomerAI_Project/workflows/CI/badge.svg)](https://github.com/VIKAS9793/CustomerAI_Project/actions)
+[![Coverage Status](https://codecov.io/gh/VIKAS9793/CustomerAI_Project/branch/master/graph/badge.svg)](https://codecov.io/gh/VIKAS9793/CustomerAI_Project)
+[![Security Status](https://snyk.io/test/github/VIKAS9793/CustomerAI_Project/badge.svg)](https://snyk.io/test/github/VIKAS9793/CustomerAI_Project)
+
+A comprehensive AI-powered customer insights and analytics platform.
 
 ### Docker Deployment
 
