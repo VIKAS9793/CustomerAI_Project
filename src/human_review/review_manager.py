@@ -4,7 +4,8 @@ import os
 import threading
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from src.utils.date_provider import DateProvider
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -54,11 +55,11 @@ class ReviewItem(BaseModel):
     priority: ReviewPriority
     confidence_score: float
     model_id: str
-    timestamp: datetime.datetime = Field(default_factory=datetime.datetime.now)
-    due_by: Optional[datetime.datetime] = None
+    timestamp: datetime = Field(default_factory=datetime.now)
+    due_by: Optional[datetime] = None
     status: ReviewStatus = ReviewStatus.PENDING
     reviewer_id: Optional[str] = None
-    review_timestamp: Optional[datetime.datetime] = None
+    review_timestamp: Optional[datetime] = None
     feedback: Optional[str] = None
     edited_response: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)

@@ -112,7 +112,7 @@ class SentimentAnalyzer:
                 ],
             }
 
-    def _calculate_keyword_score(self, text: str) -> Dict[str, float]:
+    def _calculate_sentiment_scores(self, text: str) -> Dict[str, float]:
         """
         Calculate sentiment score based on finance-specific keywords.
 
@@ -135,13 +135,13 @@ class SentimentAnalyzer:
 
             # Normalize by total keywords
             if count > 0:
-                scores[sentiment] = count / len(text.split())
+                scores[sentiment] = float(count) / len(text.split())
 
         # Normalize to sum to 1
         total = sum(scores.values())
         if total > 0:
             for sentiment in scores:
-                scores[sentiment] /= total
+                scores[sentiment] = float(scores[sentiment]) / total
 
         return scores
 

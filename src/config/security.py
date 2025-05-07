@@ -105,10 +105,7 @@ class BaseConfig(SecurityConfig):
 
 DEFAULT_SECURITY_CONFIG = BaseConfig(
     jwt_secret_key=JWT_SECRET_KEY,
-    allowed_origins=[
-        "http://localhost:3000",
-        "https://your-domain.com"
-    ],
+    allowed_origins=["http://localhost:3000", "https://your-domain.com"],
     security_headers={
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
