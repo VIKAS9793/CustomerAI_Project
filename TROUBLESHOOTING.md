@@ -20,7 +20,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Package Installation Failures
 
 **Problem**: `pip install -r requirements.txt` fails with dependency conflicts.
-
 **Solution**:
 1. Create a fresh virtual environment: `python -m venv venv_new`
 2. Activate it: `source venv_new/bin/activate` (Linux/Mac) or `venv_new\Scripts\activate` (Windows)
@@ -35,7 +34,6 @@ This document provides solutions to common issues you might encounter while sett
 ### OpenAI Integration Issues
 
 **Problem**: `ModuleNotFoundError: No module named 'openai'` despite installing requirements.
-
 **Solution**:
 1. Ensure your virtual environment is activated
 2. Install OpenAI specifically: `pip install openai==0.27.0`
@@ -46,7 +44,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Connection Refused
 
 **Problem**: API returns "Connection refused" errors.
-
 **Solution**:
 1. Verify the API server is running: `ps aux | grep uvicorn`
 2. Check if the port is in use: `netstat -tuln | grep 8000`
@@ -56,7 +53,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Timeout Issues
 
 **Problem**: API requests timeout after 30 seconds.
-
 **Solution**:
 1. Check network connectivity
 2. Increase client timeout settings
@@ -71,7 +67,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Invalid Token Errors
 
 **Problem**: Getting "Invalid token" or "Token expired" errors.
-
 **Solution**:
 1. Verify your JWT token hasn't expired
 2. Check that your `JWT_SECRET_KEY` environment variable is consistent across environments
@@ -81,7 +76,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Permission Denied
 
 **Problem**: Getting "Insufficient permissions" errors despite valid token.
-
 **Solution**:
 1. Verify your user account has the required roles
 2. Check token payload for correct role claims:
@@ -100,7 +94,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Memory Errors During Batch Processing
 
 **Problem**: Large dataset processing causes out-of-memory errors.
-
 **Solution**:
 1. Reduce batch size in API requests
 2. Implement chunking in your client code:
@@ -117,7 +110,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Sentiment Analysis Inaccuracy
 
 **Problem**: Sentiment analysis doesn't correctly capture domain-specific sentiment.
-
 **Solution**:
 1. Set `use_ai: true` in your request for financial domain expertise
 2. Provide context in your requests if available
@@ -128,7 +120,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Slow Response Generation
 
 **Problem**: AI-powered response generation is taking too long.
-
 **Solution**:
 1. Check your OpenAI API key quota and limits
 2. Use caching for common queries
@@ -145,7 +136,6 @@ This document provides solutions to common issues you might encounter while sett
 ### OpenAI API Key Issues
 
 **Problem**: "Invalid API key" or "API key quota exceeded" errors.
-
 **Solution**:
 1. Verify your OpenAI API key in environment variables
 2. Check billing status in OpenAI dashboard
@@ -156,7 +146,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Container Won't Start
 
 **Problem**: Docker container exits immediately after starting.
-
 **Solution**:
 1. Check container logs: `docker logs <container-id>`
 2. Verify environment variables are properly set
@@ -166,7 +155,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Memory Limits
 
 **Problem**: Container crashes with OOM (Out of Memory) errors.
-
 **Solution**:
 1. Increase container memory limit:
    ```
@@ -188,7 +176,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Migration Errors
 
 **Problem**: Database migration fails with "Table already exists" errors.
-
 **Solution**:
 1. Check if you're running migrations twice
 2. For development, you might want to drop and recreate the database:
@@ -205,7 +192,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Connection Pool Exhaustion
 
 **Problem**: "Too many connections" or connection timeout errors.
-
 **Solution**:
 1. Check for connection leaks in your code
 2. Adjust pool settings in config:
@@ -221,7 +207,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Dashboard Not Loading Data
 
 **Problem**: Streamlit dashboard shows loading spinner but never displays data.
-
 **Solution**:
 1. Check browser console for CORS errors
 2. Verify API is accessible from dashboard host
@@ -231,7 +216,6 @@ This document provides solutions to common issues you might encounter while sett
 ### Visualization Rendering Issues
 
 **Problem**: Charts or graphs not rendering correctly.
-
 **Solution**:
 1. Update Plotly and Streamlit to latest versions
 2. Check for data format issues
@@ -271,7 +255,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### JAX GPU Errors
 
 **Problem**: JAX fails to use GPU with errors like `XLA compilation failed` or `No GPU/TPU backend found`.
-
 **Solutions**:
 1. Ensure you have the GPU-enabled version of JAX installed:
    ```bash
@@ -291,7 +274,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### JAX Memory Issues
 
 **Problem**: Out of memory errors when using JAX with large models or datasets.
-
 **Solutions**:
 1. Use JAX's `pmap` for multi-GPU parallelism or `vmap` for vectorization
 2. Apply gradient checkpointing:
@@ -306,7 +288,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### Ray Cluster Not Connecting
 
 **Problem**: Unable to connect to Ray cluster with `ray.init()` failing.
-
 **Solutions**:
 1. Check if Ray cluster is running:
    ```bash
@@ -322,7 +303,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### Ray Out of Resources
 
 **Problem**: Ray tasks fail with "Resource Deadlock" or "No available node" errors.
-
 **Solutions**:
 1. Increase resource limits when starting Ray:
    ```bash
@@ -341,7 +321,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### MLflow Connection Errors
 
 **Problem**: Unable to connect to MLflow tracking server.
-
 **Solutions**:
 1. Verify tracking server is running:
    ```bash
@@ -357,7 +336,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### MLflow Artifact Storage Issues
 
 **Problem**: Unable to save or load artifacts with S3 or other remote storage.
-
 **Solutions**:
 1. Verify storage credentials are set:
    ```bash
@@ -376,7 +354,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### Pod Startup Failures
 
 **Problem**: Kubernetes pods for CustomerAI stay in "Pending" or fail to start.
-
 **Solutions**:
 1. Check pod status and description:
    ```bash
@@ -393,7 +370,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### Service Connectivity Issues
 
 **Problem**: Unable to access CustomerAI services deployed on Kubernetes.
-
 **Solutions**:
 1. Check service status:
    ```bash
@@ -414,7 +390,6 @@ If you're still experiencing issues after trying these solutions, please:
 #### Traces Not Appearing
 
 **Problem**: Traces aren't visible in Jaeger UI.
-
 **Solutions**:
 1. Verify Jaeger is running:
    ```bash

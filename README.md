@@ -27,7 +27,6 @@ src/
 - Docker 24.0.0 or later
 - Node.js 18.x LTS (for web dashboard)
 
-
 ## Key Features
 
 ### Cloud Integration
@@ -167,7 +166,7 @@ pip-audit
 
 ### Security
 
-For security-related issues, please contact security@customerai.com.
+For security-related issues, please contact <security@customerai.com>.
 
 See [SECURITY.md](SECURITY.md) for more details.
 
@@ -441,7 +440,7 @@ python examples/basic_usage.py
 python app.py
 ```
 
-Visit http://localhost:8000 in your browser.
+Visit <http://localhost:8000> in your browser.
 
 ### 6. Next Steps
 

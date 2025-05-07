@@ -311,7 +311,6 @@ Records a human reviewer's decision on a queued item.
 ### Dashboard Analytics
 
 #### GET /api/v1/analytics/summary
-
 Retrieves summary analytics for the dashboard.
 
 **Query Parameters**:
@@ -345,12 +344,9 @@ Retrieves summary analytics for the dashboard.
   },
   "timestamp": "2023-08-15T14:38:05.123456"
 }
-```
 
 ### Generative AI and Advanced ML
-
 #### POST /api/v1/ai/generate
-
 Generates text using state-of-the-art generative AI models.
 
 **Request Body**:
@@ -368,7 +364,6 @@ Generates text using state-of-the-art generative AI models.
   }
 }
 ```
-
 **Response**:
 ```json
 {
@@ -388,10 +383,8 @@ Generates text using state-of-the-art generative AI models.
     }
   }
 }
-```
 
 #### POST /api/v1/ai/embed
-
 Generates embeddings for text using specified model.
 
 **Request Body**:
@@ -406,7 +399,6 @@ Generates embeddings for text using specified model.
   "dimensions": 1536
 }
 ```
-
 **Response**:
 ```json
 {
@@ -422,10 +414,8 @@ Generates embeddings for text using specified model.
     "dimensions": 1536
   }
 }
-```
 
 #### POST /api/v1/ai/classify
-
 Classifies text into provided categories.
 
 **Request Body**:
@@ -442,7 +432,6 @@ Classifies text into provided categories.
   "model": "claude_sonnet"
 }
 ```
-
 **Response**:
 ```json
 {
@@ -460,10 +449,8 @@ Classifies text into provided categories.
     "model": "claude-3-5-sonnet-20240620"
   }
 }
-```
 
 #### GET /api/v1/ai/providers
-
 Gets information about available LLM providers and models.
 
 **Response**:
@@ -501,10 +488,8 @@ Gets information about available LLM providers and models.
     "default_provider": "gpt4o_financial"
   }
 }
-```
 
 #### POST /api/v1/ai/distributed-training
-
 Creates a distributed training job for model fine-tuning.
 
 **Request Body**:
@@ -522,7 +507,6 @@ Creates a distributed training job for model fine-tuning.
   "instance_type": "ml.g4dn.xlarge"
 }
 ```
-
 **Response**:
 ```json
 {
@@ -537,10 +521,8 @@ Creates a distributed training job for model fine-tuning.
   },
   "timestamp": "2025-05-04T15:20:45.123456"
 }
-```
 
 #### GET /api/v1/ai/training-job/{job_id}
-
 Gets the status of a training job.
 
 **Response**:
@@ -565,10 +547,8 @@ Gets the status of a training job.
   },
   "timestamp": "2025-05-04T15:30:45.123456"
 }
-```
 
 #### POST /api/v1/ai/deploy
-
 Deploys a trained model to the inference endpoint.
 
 **Request Body**:
@@ -590,7 +570,6 @@ Deploys a trained model to the inference endpoint.
   }
 }
 ```
-
 **Response**:
 ```json
 {
@@ -604,10 +583,8 @@ Deploys a trained model to the inference endpoint.
   },
   "timestamp": "2025-05-04T16:01:12.123456"
 }
-```
 
 #### POST /api/v1/ai/explain
-
 Gets model explanation for predictions.
 
 **Request Body**:
@@ -620,7 +597,6 @@ Gets model explanation for predictions.
   "explanation_method": "shap"
 }
 ```
-
 **Response**:
 ```json
 {
@@ -644,10 +620,8 @@ Gets model explanation for predictions.
   },
   "timestamp": "2025-05-04T16:10:27.123456"
 }
-```
 
 ## Error Responses
-
 The API uses standard HTTP status codes and returns detailed error information:
 
 **Example Error Response**:
@@ -661,12 +635,9 @@ The API uses standard HTTP status codes and returns detailed error information:
   },
   "timestamp": "2023-08-15T14:40:22.123456"
 }
-```
 
 ## Rate Limiting
-
 API endpoints are rate-limited to prevent abuse. Rate limit information is provided in response headers:
-
 ```
 X-Rate-Limit-Limit: 100
 X-Rate-Limit-Remaining: 95
@@ -674,18 +645,15 @@ X-Rate-Limit-Reset: 1692105600
 ```
 
 ## WebSocket APIs
-
 Real-time updates are available through WebSocket connections at:
 `wss://api.customerai.example.com/websocket`
 
 ### Events
-
 - `queue_update`: Notification when the human review queue changes
 - `sentiment_alert`: Real-time alert for extremely negative customer interactions
 - `system_status`: Service health and performance metrics
 
 ## API Client Libraries
-
 Official client libraries are available for:
 - Python 3.10: `pip install customerai-insights-client`
 - JavaScript: `npm install @customerai/insights-client`
