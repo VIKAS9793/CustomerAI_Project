@@ -20,16 +20,27 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel
-          # Install core test dependencies first
-          pip install pytest pytest-cov flake8 mypy black
-          # Install pinned version of argon2-cffi-bindings
-          pip install argon2-cffi-bindings==21.2.0
-          # Install project dependencies with constraints
+          # Upgrade pip and core tools
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade setuptools wheel
+
+          # Clear pip cache
+          python -m pip cache purge
+
+          # Install core test dependencies one by one to avoid conflicts
+          pip install --no-cache-dir pytest==8.0.0
+          pip install --no-cache-dir pytest-cov==4.1.0
+          pip install --no-cache-dir flake8==7.0.0
+          pip install --no-cache-dir mypy==1.8.0
+          pip install --no-cache-dir black==24.1.0
+
+          # Install pinned version of critical dependencies
+          pip install --no-cache-dir argon2-cffi-bindings==21.2.0
+          pip install --no-cache-dir argon2-cffi==21.3.0
+
+          # Install project dependencies
           if [ -f requirements.txt ]; then
-            pip install -r requirements.txt --no-deps
-            pip install -r requirements.txt
-          fi
+            pip install --no-cache-dir -r requirements.txt
       - name: Lint with flake8
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
